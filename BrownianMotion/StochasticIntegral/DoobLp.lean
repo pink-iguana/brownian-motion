@@ -503,4 +503,10 @@ theorem maximal_ineq_norm (hmar : Martingale X 𝓕 P) (ε : ℝ) (n : ι)
   refine maximal_ineq hmar.submartingale_norm (fun _ _ ↦ norm_nonneg _) ε n fun ω => ?_
   exact (hX_cont ω).continuous_comp continuous_norm
 
+theorem integral_iSup_norm_rpow_le (hmar : Martingale X 𝓕 P)
+    (hX_cont : ∀ ω, IsRightContinuous (X · ω)) {p : ℝ} (hp : 1 < p) :
+    ∫⁻ ω, (⨆ t, ‖X t ω‖ₑ) ^ p ∂P ≤
+      (.ofReal ((p / (p - 1)) ^ p : ℝ)) * ⨆ t, ∫⁻ ω, ‖X t ω‖ₑ ^ p ∂P := by
+  sorry
+
 end ProbabilityTheory

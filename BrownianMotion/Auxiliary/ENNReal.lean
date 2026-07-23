@@ -1,6 +1,7 @@
 module
 
 public import Mathlib.Analysis.Normed.Group.Real
+public import Mathlib.Analysis.SpecialFunctions.Pow.NNReal
 public import Mathlib.Analysis.SpecificLimits.Basic
 
 @[expose] public section
@@ -35,6 +36,20 @@ lemma one_le_toReal {p : ℝ≥0∞} (hp1 : 1 ≤ p) (hp2 : p ≠ ⊤) : 1 ≤ p
 
 lemma toReal_pos_of_one_le {p : ℝ≥0∞} (hp1 : 1 ≤ p) (hp2 : p ≠ ⊤) : 0 < p.toReal :=
     LT.lt.trans_le (by simp) (one_le_toReal hp1 hp2)
+
+lemma rpow_iSup {ι : Type*} (f : ι → ℝ≥0∞) {x : ℝ} (hx : 0 < x) :
+    (⨆ i, f i) ^ x = ⨆ i, (f i) ^ x := by
+  let g : ℝ≥0∞ ≃o ℝ≥0∞ :=
+    {
+      toFun a := a ^ x
+      invFun a := a ^ (1 / x)
+      map_rel_iff' {a b} := by
+        simp only [one_div, Equiv.coe_fn_mk]
+        exact ENNReal.rpow_le_rpow_iff hx
+      left_inv a := by simpa using Or.inl hx.ne'
+      right_inv a := by simpa using Or.inl hx.ne'
+    }
+  exact g.map_iSup _
 
 end ENNReal
 
