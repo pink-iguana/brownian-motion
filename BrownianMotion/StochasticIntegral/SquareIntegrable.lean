@@ -238,7 +238,7 @@ lemma IsSquareIntegrable.eLpNorm_mono [CompleteSpace E] (hX : IsSquareIntegrable
 lemma _root_.MeasureTheory.UniformIntegrable.ae_tendsto_limitProcess
     (hX1 : UniformIntegrable X 1 P) (hX2 : Martingale X 𝓕 P) :
     ∀ᵐ ω ∂P, Tendsto (X · ω) atTop (𝓝 (𝓕.limitProcess X P ω)) := by
-  sorry
+  sorr
 
 lemma IsSquareIntegrable.ae_tendsto_limitProcess (hX : IsSquareIntegrable X 𝓕 P) :
     ∀ᵐ ω ∂P, Tendsto (X · ω) atTop (𝓝 (𝓕.limitProcess X P ω)) :=
