@@ -287,6 +287,12 @@ lemma UniformIntegrable.condExp {X : ι → Ω → E} [NormedAddCommGroup E] [No
     UniformIntegrable (fun i ↦ μ[X i | 𝓕 i]) 1 μ :=
   (hX.condExp' h𝓕).comp (fun i ↦ (i, i))
 
+lemma uniformIntegrable_of_eLpNorm_le {X : ι → Ω → E} [NormedAddCommGroup E] [NormedSpace ℝ E]
+    [CompleteSpace E] [IsFiniteMeasure μ] (p : ℝ≥0∞) (hp : 1 < p)
+    (C : ℝ≥0∞) (hC : C ≠ ∞) (hX : ∀ i, eLpNorm (X i) p μ ≤ C) :
+    UniformIntegrable X 1 μ := by
+  sorry
+
 variable {ι : Type*} [LinearOrder ι] [OrderBot ι] [Countable ι] [TopologicalSpace ι]
   [OrderTopology ι] [NormedAddCommGroup E] [NormedSpace ℝ E]
   [CompleteSpace E] {𝓕 : Filtration ι mΩ} [SigmaFiniteFiltration μ 𝓕]

@@ -24,21 +24,21 @@ open scoped Topology ENNReal
 variable {ι E : Type*} [TopologicalSpace ι]
 
 /-- The predicate that a function is right continuous. -/
-abbrev Function.IsRightContinuous [TopologicalSpace E] [Preorder ι] (f : ι → E) :=
+abbrev IsRightContinuous [TopologicalSpace E] [Preorder ι] (f : ι → E) :=
   ∀ a, ContinuousWithinAt f (Set.Ioi a) a
 
 lemma Continuous.isRightContinuous [TopologicalSpace E] [Preorder ι]
     {f : ι → E} (hf : Continuous f) :
-    f.IsRightContinuous :=
+    IsRightContinuous f :=
   fun _ ↦ hf.continuousWithinAt
 
-lemma Function.IsRightContinuous.continuous_comp {F : Type*} [TopologicalSpace E]
+lemma IsRightContinuous.continuous_comp {F : Type*} [TopologicalSpace E]
     [TopologicalSpace F] [Preorder ι] {g : E → F}
     {f : ι → E} (hg : Continuous g) (hf : IsRightContinuous f) : IsRightContinuous (g ∘ f) :=
   fun x ↦ (hg.tendsto (f x)).comp (hf x)
 
 @[simp]
-lemma Function.isRightContinuous_const [TopologicalSpace E] [Preorder ι] (c : E) :
+lemma isRightContinuous_const [TopologicalSpace E] [Preorder ι] (c : E) :
     IsRightContinuous (fun _ ↦ c : ι → E) :=
   fun _ ↦ continuousWithinAt_const
 
@@ -56,7 +56,7 @@ lemma Function.IsRightContinuous.div' [TopologicalSpace E] [Preorder ι] [Div E]
 
 /-- A function is cadlag if it is right-continuous and has left limits. -/
 structure IsCadlag [TopologicalSpace E] [Preorder ι] (f : ι → E) : Prop where
-  right_continuous : Function.IsRightContinuous f
+  right_continuous : IsRightContinuous f
   left_limit : ∀ x, ∃ l, Tendsto f (𝓝[<] x) (𝓝 l)
 
 lemma Continuous.isCadlag [TopologicalSpace E] [Preorder ι] {f : ι → E} (hf : Continuous f) :
@@ -66,7 +66,7 @@ lemma Continuous.isCadlag [TopologicalSpace E] [Preorder ι] {f : ι → E} (hf 
 
 @[simp]
 lemma isCadlag_const [TopologicalSpace E] [Preorder ι] (c : E) : IsCadlag (fun _ ↦ c : ι → E) :=
-  ⟨Function.isRightContinuous_const c, fun _ ↦ ⟨c, tendsto_const_nhds⟩⟩
+  ⟨isRightContinuous_const c, fun _ ↦ ⟨c, tendsto_const_nhds⟩⟩
 
 section Jump
 
@@ -193,7 +193,7 @@ lemma IsCadlag.sub {E : Type*} [Sub E] [TopologicalSpace E] [ContinuousSub E]
 lemma IsCadlag.continuous_comp {κ E F : Type*} [TopologicalSpace κ] [TopologicalSpace E]
     [TopologicalSpace F] [Preorder κ] {g : E → F} {f : κ → E}
     (hg : Continuous g) (hf : IsCadlag f) : IsCadlag (g ∘ f) where
-  right_continuous := Function.IsRightContinuous.continuous_comp hg hf.right_continuous
+  right_continuous := IsRightContinuous.continuous_comp hg hf.right_continuous
   left_limit i := by
     obtain ⟨l, hl⟩ := hf.left_limit i
     exact ⟨g l, (hg.tendsto l).comp hl⟩

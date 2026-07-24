@@ -14,7 +14,7 @@ public import BrownianMotion.StochasticIntegral.LocalizingSequence
 
 @[expose] public section
 
-open MeasureTheory Filter Filtration
+open MeasureTheory Filter
 open scoped ENNReal Topology
 
 namespace ProbabilityTheory
@@ -72,8 +72,8 @@ section TopologicalSpace
 variable [TopologicalSpace E]
 
 lemma Locally.rightContinuous
-    (hX : Locally (fun X ↦ ∀ ω, Function.IsRightContinuous (X · ω)) 𝓕 X P) :
-    ∀ᵐ ω ∂P, Function.IsRightContinuous (X · ω) := by
+    (hX : Locally (fun X ↦ ∀ ω, IsRightContinuous (X · ω)) 𝓕 X P) :
+    ∀ᵐ ω ∂P, IsRightContinuous (X · ω) := by
   obtain ⟨τ, hτ⟩ := hX
   filter_upwards [hτ.1.tendsto_top] with ω hω i
   simp only [tendsto_atTop_nhds] at hω
@@ -117,7 +117,7 @@ lemma Locally.isCadlag
 
 /-- The processes with right-continuous paths are a stable class. -/
 lemma isStable_rightContinuous :
-    IsStable 𝓕 (fun (X : ι → Ω → E) ↦ ∀ ω, Function.IsRightContinuous (X · ω)) := by
+    IsStable 𝓕 (fun (X : ι → Ω → E) ↦ ∀ ω, IsRightContinuous (X · ω)) := by
   intro X hX τ hτ ω a
   dsimp [stoppedProcess]
   by_cases h_stop : (a : WithTop ι) < τ ω
@@ -216,8 +216,8 @@ lemma isStable_isCadlag :
 variable [𝓕.IsComplete P]
 
 lemma locally_rightContinuous_iff :
-    Locally (fun X ↦ ∀ ω, Function.IsRightContinuous (X · ω)) 𝓕 X P
-    ↔ ∀ᵐ ω ∂P, Function.IsRightContinuous (X · ω) :=
+    Locally (fun X ↦ ∀ ω, IsRightContinuous (X · ω)) 𝓕 X P
+    ↔ ∀ᵐ ω ∂P, IsRightContinuous (X · ω) :=
   ⟨fun h ↦ h.rightContinuous, fun h ↦ locally_of_ae h <| fun _ ↦ continuousWithinAt_const⟩
 
 lemma locally_left_limit_iff :
@@ -263,7 +263,7 @@ lemma rightContinuous_indicator [TopologicalSpace ι]
     IsRightContinuous fun t ↦ s.indicator (X t) ω := by
   by_cases hω : ω ∈ s
   · simpa [Set.indicator_of_mem hω] using hC ω
-  · simp [Set.indicator_of_notMem hω, Function.IsRightContinuous, isRightContinuous_const]
+  · simp [Set.indicator_of_notMem hω, IsRightContinuous, isRightContinuous_const]
 
 lemma stronglyAdapted_indicator [OrderBot ι]
     (hX : StronglyAdapted 𝓕 X) {τ : Ω → WithTop ι} (hτ : IsStoppingTime 𝓕 τ) :

@@ -91,7 +91,7 @@ variable [MeasurableSpace ι] [BorelSpace ι]
 
 lemma _root_.MeasureTheory.stronglyMeasurable_stoppedValue [Nonempty ι]
     (h : IsStronglyProgressive 𝓕 X)
-    (hRC : ∀ ω, Function.IsRightContinuous (X · ω)) (hτ : IsStoppingTime 𝓕 τ) :
+    (hRC : ∀ ω, _root_.IsRightContinuous (X · ω)) (hτ : IsStoppingTime 𝓕 τ) :
     StronglyMeasurable[hτ.measurableSpace] (stoppedValue X τ) := by
   borelize E
   refine stronglyMeasurable_iff_measurable_separable.2 ⟨measurable_stoppedValue h hτ, ?_⟩
@@ -102,7 +102,7 @@ lemma _root_.MeasureTheory.stronglyMeasurable_stoppedValue [Nonempty ι]
   simp [stoppedValue]
 
 lemma stronglyMeasurable_stoppedValue' [Zero E] [OrderBot ι] (hX : IsStronglyProgressive 𝓕 X)
-    (hRC : ∀ ω, Function.IsRightContinuous (X · ω)) {τ : Ω → WithTop ι} (hτ : IsStoppingTime 𝓕 τ) :
+    (hRC : ∀ ω, _root_.IsRightContinuous (X · ω)) {τ : Ω → WithTop ι} (hτ : IsStoppingTime 𝓕 τ) :
     StronglyMeasurable[hτ.measurableSpace] (𝓕.stoppedValue' X τ P) := by
   have : 𝓕.stoppedValue' X τ P = {ω | τ ω = ⊤}.piecewise
       ({ω | τ ω = ⊤}.indicator (𝓕.limitProcess X P)) (stoppedValue X τ) := by

@@ -1,6 +1,7 @@
 module
 
 public import BrownianMotion.Auxiliary.Indistinguishable
+public import BrownianMotion.StochasticIntegral.Cadlag
 public import Mathlib.Probability.Process.Stopping
 
 @[expose] public section
@@ -31,6 +32,46 @@ lemma stoppedProcess_congr (h : X ≡ᵐ[P] Y) :
     stoppedProcess X τ ≡ᵐ[P] stoppedProcess Y τ := by
   filter_upwards [h] with ω h t
   simp [stoppedProcess, h]
+
+section Topology
+
+variable [TopologicalSpace ι] [OrderTopology ι] [TopologicalSpace E]
+
+lemma _root_.Continuous.stoppedProcess {ω : Ω} (hX : Continuous (X · ω)) (τ : Ω → WithTop ι) :
+    Continuous (stoppedProcess X τ · ω) := by
+  cases h : τ ω with
+  | top => simpa [h]
+  | coe t =>
+    simp only [h, WithTop.coe_inj, stoppedProcess_of_eq_coe]
+    fun_prop
+
+lemma _root_.IsRightContinuous.stoppedProcess (hX : IsRightContinuous (X · ω)) (τ : Ω → WithTop ι) :
+    IsRightContinuous (stoppedProcess X τ · ω) := by
+  cases h : τ ω with
+  | top => simpa [h]
+  | coe t =>
+    simp only [h, WithTop.coe_inj, stoppedProcess_of_eq_coe]
+    intro s
+    obtain hst | hts := lt_or_ge s t
+    · exact hX (min s t) |>.comp (f := (min · t)) (by fun_prop)
+        (by grind [Set.MapsTo])
+    · exact (continuous_const (y := X t ω)).continuousWithinAt.congr (by grind) (by grind)
+
+lemma _root_.IsCadlag.stoppedProcess (hX : IsCadlag (X · ω)) (τ : Ω → WithTop ι) :
+    IsCadlag (stoppedProcess X τ · ω) := by
+  cases h : τ ω with
+  | top => simpa [h]
+  | coe t =>
+    refine ⟨hX.right_continuous.stoppedProcess τ, fun s ↦ ?_⟩
+    simp only [h, WithTop.coe_inj, stoppedProcess_of_eq_coe]
+    obtain hst | hts := le_or_gt s t
+    · obtain ⟨l, hl⟩ := hX.left_limit s
+      exact ⟨l, hl.congr' (Set.EqOn.eventuallyEq_nhdsWithin fun s hs ↦ by grind)⟩
+    · refine ⟨X t ω, tendsto_const_nhds.congr' ?_⟩
+      rw [eventuallyEq_nhdsWithin_iff, eventually_nhds_iff]
+      exact ⟨Set.Ioi t, by grind, isOpen_Ioi, by grind⟩
+
+end Topology
 
 end stoppedProcess
 

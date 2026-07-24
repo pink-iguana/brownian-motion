@@ -741,7 +741,7 @@ lemma ClassDL.hasLocallyIntegrableSup {ι : Type*} [Nonempty ι]
   have hY1 : StronglyAdapted 𝓕 Y := hX2.stronglyAdapted.norm
   have hY2 : ∀ (ω : Ω), IsCadlag (Y · ω) := by
     refine fun ω ↦ ⟨?_, fun i ↦ ?_⟩
-    · exact Function.IsRightContinuous.continuous_comp continuous_norm (hX1 ω).1
+    · exact IsRightContinuous.continuous_comp continuous_norm (hX1 ω).1
     · obtain ⟨l, hl⟩ := (hX1 ω).2 i
       exact ⟨‖l‖, (continuous_norm.tendsto l).comp hl⟩
   let τ : ℕ → Ω → WithTop ι := (fun n ↦ hittingAfter Y (Set.Ici n) ⊥)
