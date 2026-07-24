@@ -8,14 +8,19 @@ module
 public import BrownianMotion.Auxiliary.AEEq
 public import BrownianMotion.Auxiliary.Indistinguishable
 public import BrownianMotion.Auxiliary.Martingale
+public import BrownianMotion.Auxiliary.StoppedProcess
+public import BrownianMotion.Auxiliary.StoppedValue
 public import BrownianMotion.StochasticIntegral.LocalMartingale
 public import Mathlib.Probability.Notation
 
 import BrownianMotion.Auxiliary.Analysis
 import BrownianMotion.Auxiliary.LimitProcess
 import BrownianMotion.Auxiliary.MeanInequalities
+import BrownianMotion.Auxiliary.MeasureTheory
 import BrownianMotion.Gaussian.StochasticProcesses
+import BrownianMotion.StochasticIntegral.ClassD
 import BrownianMotion.StochasticIntegral.DoobLp
+import Mathlib.MeasureTheory.Function.Holder
 import Mathlib.MeasureTheory.Integral.Average
 
 /-! # Square integrable martingales
@@ -31,7 +36,7 @@ namespace ProbabilityTheory
 
 variable {ι Ω E : Type*} [LinearOrder ι] [TopologicalSpace ι] [NormedAddCommGroup E]
   {mΩ : MeasurableSpace Ω} {P : Measure Ω}
-  {X Y : ι → Ω → E} {𝓕 : Filtration ι mΩ}
+  {X Y Z : ι → Ω → E} {𝓕 : Filtration ι mΩ} {τ : Ω → WithTop ι}
 
 section NormedSpace
 
@@ -256,17 +261,56 @@ lemma tendsto_ae_condExp' (X : Ω → E) :
     ∀ᵐ ω ∂P, Tendsto (P[X | 𝓕 ·] ω) atTop (𝓝 (P[X | ⨆ t, 𝓕 t] ω)) := by
   sorry
 
+lemma _root_.MeasureTheory.Martingale.condExp_limitProcess_ae_eq
+    (hX1 : Martingale X 𝓕 P) (hX2 : UniformIntegrable X 1 P)
+    (hX3 : ∀ ω, IsCadlag (X · ω)) (t : ι) :
+    P[𝓕.limitProcess X P | 𝓕 t] =ᵐ[P] X t := by
+  sorry
+
 lemma IsSquareIntegrable.condExp_limitProcess_ae_eq (hX : IsSquareIntegrable X 𝓕 P) (t : ι) :
     P[𝓕.limitProcess X P | 𝓕 t] =ᵐ[P] X t := by
+  sorry
+lemma IsAESquareIntegrable.condExp_limitProcess_ae_eq' [CompleteSpace E] [Nonempty ι]
+    (hX : IsAESquareIntegrable X 𝓕 P) {τ : Ω → WithTop ι} (hτ : IsStoppingTime 𝓕 τ) :
+    P[𝓕.limitProcess X P | hτ.measurableSpace] =ᵐ[P] 𝓕.stoppedValue' X τ P := by
   sorry
 
 lemma IsSquareIntegrable.tendsto_eLpNorm_two_limitProcess (hX : IsSquareIntegrable X 𝓕 P) :
     Tendsto (fun i ↦ eLpNorm (X i - 𝓕.limitProcess X P) 2 P) atTop (𝓝 0) := by
   sorry
 
+lemma iSup_eLpNorm_le_eLpNorm_limitProcess (hX1 : Martingale X 𝓕 P)
+    (hX2 : ∀ ω, IsCadlag (X · ω)) [IsFiniteMeasure P] [CompleteSpace E]
+    (hX3 : UniformIntegrable X 1 P) :
+    ⨆ t, eLpNorm (X t) 2 P ≤ eLpNorm (𝓕.limitProcess X P) 2 P := by
+  refine iSup_le fun t ↦ ?_
+  rw [eLpNorm_congr_ae (hX1.condExp_limitProcess_ae_eq hX3 hX2 t).symm]
+  exact eLpNorm_condExp_le_eLpNorm (by simp) _
+
+lemma isSquareIntegrable_of_limitProcess [CompleteSpace E] [IsFiniteMeasure P]
+    (hX1 : Martingale X 𝓕 P) (hX2 : ∀ ω, IsCadlag (X · ω))
+    (hX3 : UniformIntegrable X 1 P) (hX4 : MemLp (𝓕.limitProcess X P) 2 P) :
+    IsSquareIntegrable X 𝓕 P where
+  martingale := hX1
+  cadlag := hX2
+  bounded := by
+    grw [iSup_eLpNorm_le_eLpNorm_limitProcess hX1 hX2 hX3]
+    exact hX4.2
+
 lemma IsSquareIntegrable.iSup_eLpNorm_eq_eLpNorm_limitProcess (hX : IsSquareIntegrable X 𝓕 P) :
     ⨆ i, eLpNorm (X i) 2 P = eLpNorm (𝓕.limitProcess X P) 2 P := by
   sorry
+
+lemma IsSquareIntegrable.iSup_lintegral_pow_two_eq (hX : IsSquareIntegrable X 𝓕 P) :
+    ⨆ t, ∫⁻ ω, ‖X t ω‖ₑ ^ 2 ∂P = ∫⁻ ω, ‖𝓕.limitProcess X P ω‖ₑ ^ 2 ∂P := by
+  apply ENNReal.rpow_left_injective (x := 1 / 2) (by simp)
+  simp only
+  rw [ENNReal.rpow_iSup _ (by simp)]
+  convert hX.iSup_eLpNorm_eq_eLpNorm_limitProcess
+  · rw [eLpNorm_eq_eLpNorm', eLpNorm']
+    all_goals simp
+  · rw [eLpNorm_eq_eLpNorm', eLpNorm']
+    all_goals simp
 
 lemma IsAESquareIntegrable.iSup_eLpNorm_eq_eLpNorm_limitProcess [Nonempty ι]
     (hX : IsAESquareIntegrable X 𝓕 P) :
@@ -282,6 +326,150 @@ lemma IsSquareIntegrable.memLp_limitProcess (hX : IsSquareIntegrable X 𝓕 P) :
   · exact Filtration.stronglyMeasurable_limit_process'.aestronglyMeasurable
   rw [← hX.iSup_eLpNorm_eq_eLpNorm_limitProcess]
   exact hX.bounded
+
+lemma IsAESquareIntegrable.memLp_limitProcess (hX : IsAESquareIntegrable X 𝓕 P) :
+    MemLp (𝓕.limitProcess X P) 2 P := by
+  rw [memLp_congr_ae (𝓕.limitProcess_congr hX.choose_spec.2)]
+  exact hX.choose_spec.1.memLp_limitProcess
+
+lemma _root_.Continuous.stoppedProcess [Nonempty ι] [OrderTopology ι] {ω : Ω}
+    (hX : Continuous (X · ω)) (τ : Ω → WithTop ι) :
+    Continuous (stoppedProcess X τ · ω) := by
+  cases h : τ ω with
+  | top => simpa [h]
+  | coe t =>
+    simp only [h, WithTop.coe_inj, stoppedProcess_of_eq_coe]
+    fun_prop
+
+lemma _root_.IsCadlag.stoppedProcess [Nonempty ι] [OrderTopology ι] {ω : Ω}
+    (hX : IsCadlag (X · ω)) (τ : Ω → WithTop ι) :
+    IsCadlag (stoppedProcess X τ · ω) := by
+  cases h : τ ω with
+  | top => simpa [h]
+  | coe t =>
+    simp only [h, WithTop.coe_inj, stoppedProcess_of_eq_coe]
+    refine ⟨fun s ↦ ?_, fun s ↦ ?_⟩
+    · obtain hst | hts := lt_or_ge s t
+      · exact hX.right_continuous (min s t) |>.comp (f := (min · t)) (by fun_prop)
+          (by grind [Set.MapsTo])
+      · exact (continuous_const (y := X t ω)).continuousWithinAt.congr (by grind) (by grind)
+    · obtain hst | hts := le_or_gt s t
+      · obtain ⟨l, hl⟩ := hX.left_limit s
+        exact ⟨l, hl.congr' (Set.EqOn.eventuallyEq_nhdsWithin fun s hs ↦ by grind)⟩
+      · refine ⟨X t ω, tendsto_const_nhds.congr' ?_⟩
+        rw [eventuallyEq_nhdsWithin_iff, eventually_nhds_iff]
+        exact ⟨Set.Ioi t, by grind, isOpen_Ioi, by grind⟩
+
+lemma limitProcess_stoppedProcess [OrderBot ι]
+    [OrderTopology ι] [SecondCountableTopology ι] {τ : Ω → WithTop ι}
+    (hX1 : Martingale X 𝓕 P) (hX2 : UniformIntegrable X 1 P) (hX3 : ∀ ω, IsRightContinuous (X · ω))
+    (hτ : IsStoppingTime 𝓕 τ) :
+    𝓕.limitProcess (stoppedProcess X τ) P =ᵐ[P] 𝓕.stoppedValue' X τ P := by
+  borelize ι E
+  apply 𝓕.limitProcess_ae_eq
+  · exact 𝓕.stronglyMeasurable_stoppedValue'
+      (hX1.stronglyAdapted.isStronglyProgressive_of_rightContinuous hX3) hX3 hτ |>.mono sorry
+      -- #42021
+  filter_upwards [hX2.ae_tendsto_limitProcess hX1] with ω h
+  cases h1 : τ ω with
+  | top => simpa [h1]
+  | coe t =>
+    simp only [h1, WithTop.coe_inj, stoppedProcess_of_eq_coe, Filtration.stoppedValue'_of_eq_coe]
+    exact tendsto_const_nhds.congr' (eventually_atTop.2 ⟨t, fun s hs ↦ by simp [hs]⟩)
+
+lemma IsSquareIntegrable.limitProcess_stoppedProcess [OrderBot ι] [OrderTopology ι]
+    [SecondCountableTopology ι] (hX : IsSquareIntegrable X 𝓕 P) (hτ : IsStoppingTime 𝓕 τ) :
+    𝓕.limitProcess (stoppedProcess X τ) P =ᵐ[P] 𝓕.stoppedValue' X τ P :=
+  ProbabilityTheory.limitProcess_stoppedProcess hX.martingale hX.uniformIntegrable
+    (fun ω ↦ (hX.cadlag ω).right_continuous) hτ
+
+lemma IsAESquareIntegrable.limitProcess_stoppedProcess [OrderBot ι] [OrderTopology ι]
+    [SecondCountableTopology ι]
+    (hX : IsAESquareIntegrable X 𝓕 P) (hτ : IsStoppingTime 𝓕 τ) :
+    𝓕.limitProcess (stoppedProcess X τ) P =ᵐ[P] 𝓕.stoppedValue' X τ P := by
+  grw [𝓕.limitProcess_congr (stoppedProcess_congr hX.choose_spec.2),
+    hX.choose_spec.1.limitProcess_stoppedProcess hτ, 𝓕.stoppedValue'_congr hX.choose_spec.2]
+
+
+lemma IsSquareIntegrable.stronglyMeasurable_stoppedValue' [MeasurableSpace ι] [Nonempty ι]
+    [OrderTopology ι] [OrderBot ι] [SecondCountableTopology ι] [BorelSpace ι]
+    (hX : IsSquareIntegrable X 𝓕 P) {τ : Ω → WithTop ι} (hτ : IsStoppingTime 𝓕 τ) :
+    StronglyMeasurable[hτ.measurableSpace] (𝓕.stoppedValue' X τ P) :=
+  𝓕.stronglyMeasurable_stoppedValue'
+    (hX.martingale.stronglyAdapted.isStronglyProgressive_of_rightContinuous
+      (fun ω ↦ (hX.cadlag ω).right_continuous)) (fun ω ↦ (hX.cadlag ω).right_continuous) hτ
+
+lemma IsAESquareIntegrable.aestronglyMeasurable_stoppedValue' [MeasurableSpace ι] [Nonempty ι]
+    [OrderTopology ι] [OrderBot ι] [SecondCountableTopology ι] [BorelSpace ι]
+    (hX : IsAESquareIntegrable X 𝓕 P) {τ : Ω → WithTop ι} (hτ : IsStoppingTime 𝓕 τ) :
+    AEStronglyMeasurable[hτ.measurableSpace] (𝓕.stoppedValue' X τ P) P :=
+  ⟨𝓕.stoppedValue' hX.choose τ P, hX.choose_spec.1.stronglyMeasurable_stoppedValue' hτ,
+    𝓕.stoppedValue'_congr hX.choose_spec.2⟩
+
+protected
+lemma IsSquareIntegrable.stoppedProcess [OrderTopology ι] [OrderBot ι]
+    [SecondCountableTopology ι] [MeasurableSpace E] [IsFiniteMeasure P]
+    [BorelSpace E] [CompleteSpace E] [MetrizableSpace ι] [Approximable 𝓕 P]
+    (hX : IsSquareIntegrable X 𝓕 P)
+    {τ : Ω → WithTop ι} (hτ : IsStoppingTime 𝓕 τ) :
+    IsSquareIntegrable (stoppedProcess X τ) 𝓕 P := by
+  borelize ι
+  apply isSquareIntegrable_of_limitProcess
+  · exact hX.martingale.stoppedProcess (fun _ ↦ (hX.cadlag _).right_continuous) hτ
+  · exact fun ω ↦ (hX.cadlag ω).stoppedProcess τ
+  · have : ClassD X 𝓕 P := hX.martingale.classD_iff_uniformIntegrable hX.isRightContinuous |>.2
+        hX.uniformIntegrable
+    simp_rw [stoppedProcess_eq_stoppedValue]
+    exact this.uniformIntegrable.comp (fun t : ι ↦ ⟨fun ω ↦ min t (τ ω),
+      (isStoppingTime_const 𝓕 t).min hτ, by simp⟩)
+  · refine ⟨𝓕.stronglyMeasurable_limit_process'.aestronglyMeasurable, ?_⟩
+    rw [eLpNorm_lt_top_iff_lintegral_rpow_enorm_lt_top (by simp) (by simp)]
+    calc
+    ∫⁻ ω, ‖𝓕.limitProcess (MeasureTheory.stoppedProcess X τ) P ω‖ₑ ^ (ENNReal.toReal 2) ∂P
+      = ∫⁻ ω, ‖𝓕.stoppedValue' X τ P ω‖ₑ ^ (ENNReal.toReal 2) ∂P := by
+      apply lintegral_congr_ae
+      filter_upwards [hX.limitProcess_stoppedProcess hτ] with ω h
+      simp [h]
+    _ ≤ ∫⁻ ω, (⨆ t, ‖X t ω‖ₑ) ^ (ENNReal.toReal 2) ∂P := by
+      apply lintegral_mono_ae
+      filter_upwards [hX.isAESquareIntegrable.ae_tendsto_limitProcess] with ω h1
+      gcongr
+      cases h : τ ω with
+      | top =>
+        simp only [h, Filtration.stoppedValue'_of_eq_top]
+        grw [← ((continuous_enorm.tendsto (𝓕.limitProcess X P ω)).comp h1).limsup_eq,
+          limsup_le_iSup]
+        simp
+      | coe t =>
+        simpa [h] using le_iSup (fun s ↦ ‖X s ω‖ₑ) t
+    _ ≤ 4 * ∫⁻ ω, ‖𝓕.limitProcess X P ω‖ₑ ^ (ENNReal.toReal 2) ∂P := by
+      grw [integral_iSup_norm_rpow_le hX.martingale hX.isRightContinuous (by simp)]
+      simp [hX.iSup_lintegral_pow_two_eq]
+      norm_num
+    _ < ∞ := by
+      apply ENNReal.mul_lt_top (by simp)
+      rw [← eLpNorm_lt_top_iff_lintegral_rpow_enorm_lt_top (by simp) (by simp)]
+      exact hX.memLp_limitProcess.2
+
+protected
+lemma IsAESquareIntegrable.stoppedProcess [OrderTopology ι] [OrderBot ι]
+  [SecondCountableTopology ι] [MeasurableSpace E] [IsFiniteMeasure P]
+  [CompleteSpace E]
+  [BorelSpace E] [MetrizableSpace ι] [Approximable 𝓕 P] (hX : IsAESquareIntegrable X 𝓕 P)
+    {τ : Ω → WithTop ι} (hτ : IsStoppingTime 𝓕 τ) :
+    IsAESquareIntegrable (stoppedProcess X τ) 𝓕 P := by
+  borelize ι
+  exact ⟨stoppedProcess hX.choose τ, hX.choose_spec.1.stoppedProcess hτ, by
+    filter_upwards [hX.choose_spec.2] with ω h t
+    simp [stoppedProcess, h]⟩
+
+lemma IsAESquareIntegrable.memLp_two_stoppedValue' [OrderTopology ι] [SecondCountableTopology ι]
+    [OrderBot ι] [IsFiniteMeasure P] [CompleteSpace E] [MetrizableSpace ι] [Approximable 𝓕 P]
+    {τ : Ω → WithTop ι} (hτ : IsStoppingTime 𝓕 τ) (hX : IsAESquareIntegrable X 𝓕 P) :
+    MemLp (𝓕.stoppedValue' X τ P) 2 P := by
+  borelize E
+  rw [← memLp_congr_ae (hX.limitProcess_stoppedProcess hτ)]
+  exact (hX.stoppedProcess hτ).memLp_limitProcess
 
 end NormedSpace
 
@@ -396,6 +584,18 @@ lemma SquareIntegrable.mk_eq_mk {X Y : ι → Ω → E} {hX : IsAESquareIntegrab
     ext
     grw [mk_indist, mk_indist, h]
 
+lemma SquareIntegrable.mk_add {hX : IsAESquareIntegrable X 𝓕 P}
+    {hY : IsAESquareIntegrable Y 𝓕 P} :
+    mk (X + Y) (hX.add hY) = mk X hX + mk Y hY := by
+  ext
+  grw [mk_indist, coe_add, mk_indist, mk_indist]
+
+lemma SquareIntegrable.mk_sub {hX : IsAESquareIntegrable X 𝓕 P}
+    {hY : IsAESquareIntegrable Y 𝓕 P} :
+    mk (X - Y) (hX.sub hY) = mk X hX - mk Y hY := by
+  ext
+  grw [mk_indist, coe_sub, mk_indist, mk_indist]
+
 variable (E P 𝓕) in
 lemma SquareIntegrable.coe_const (c : E) :
     (mk (fun _ _ ↦ c) .const : SquareIntegrable ι E P 𝓕) ≡ᵐ[P] (fun _ _ ↦ c) :=
@@ -507,6 +707,11 @@ lemma SquareIntegrable.norm_def {X : SquareIntegrable ι E P 𝓕} :
   rw [toL2_def, Lp.norm_toLp, lpNorm, if_pos]
   exact 𝓕.stronglyMeasurable_limit_process'.aestronglyMeasurable
 
+lemma SquareIntegrable.enorm_def {X : SquareIntegrable ι E P 𝓕} :
+    ‖X‖ₑ = eLpNorm (𝓕.limitProcess X P) 2 P := by
+  rw [← ofReal_norm, norm_def, ofReal_lpNorm]
+  exact (isSquareIntegrable_coe X).memLp_limitProcess
+
 end NormedSpace
 
 variable [InnerProductSpace ℝ E] [Nonempty ι] [SeparableSpace ι]
@@ -521,6 +726,16 @@ lemma SquareIntegrable.inner_def {X Y : SquareIntegrable ι E P 𝓕} :
   apply integral_congr_ae
   filter_upwards [MemLp.coeFn_toLp (isSquareIntegrable_coe X).memLp_limitProcess,
     MemLp.coeFn_toLp (isSquareIntegrable_coe Y).memLp_limitProcess] with ω h1 h2
+  simp_all
+
+lemma IsAESquareIntegrable.inner_limitProcess_eq (hX : IsAESquareIntegrable X 𝓕 P)
+    (hY : IsAESquareIntegrable Y 𝓕 P) :
+    P[fun ω ↦ ⟪𝓕.limitProcess X P ω, 𝓕.limitProcess Y P ω⟫] =
+      ⟪SquareIntegrable.mk X hX, .mk Y hY⟫ := by
+  rw [SquareIntegrable.inner_def]
+  apply integral_congr_ae
+  filter_upwards [𝓕.limitProcess_congr (SquareIntegrable.mk_indist hX),
+    𝓕.limitProcess_congr (SquareIntegrable.mk_indist hY)] with ω h1 h2
   simp_all
 
 /-- Given a martingale `X`, this is a càdlàg martingale that is a modification of `X`. -/
@@ -679,6 +894,15 @@ lemma mem_continuousSquareIntegrable [𝓕.IsComplete P] {X : SquareIntegrable �
     X.isAESquareIntegrable_coe.isSquareIntegrable_toContinuous hX,
     X.isAESquareIntegrable_coe.indist_toContinuous hX⟩
 
+/-- A square integrable martingale that is almost surely continuous is undistinguishable
+from a square integrable martingale that is continuous everywhere. -/
+lemma IsAESquareIntegrable.mk_mem_continuousSquareIntegrable [𝓕.IsComplete P]
+    (hX1 : IsAESquareIntegrable X 𝓕 P) (hX2 : ∀ᵐ ω ∂P, Continuous (X · ω)) :
+    .mk X hX1 ∈ continuousSquareIntegrable ι E P 𝓕 := by
+  apply mem_continuousSquareIntegrable
+  filter_upwards [hX2, SquareIntegrable.mk_indist hX1] with ω h1 h2
+  simpa [h2]
+
 variable [𝓕.IsComplete P]
 
 theorem IsSquareIntegrable.integral_iSup_norm_rpow_rpow_inv_le_limitProcess
@@ -714,9 +938,7 @@ lemma exists_subsequence_ae_tendsto_uniformly {M : ℕ → ι → Ω → E} {N :
     (h : Tendsto (fun n ↦ eLpNorm (𝓕.limitProcess (M n) P - 𝓕.limitProcess N P) 2 P) atTop (𝓝 0)) :
     ∃ φ : ℕ → ℕ, StrictMono φ ∧
       (∀ᵐ ω ∂P, TendstoUniformly (fun n t ↦ M (φ n) t ω) (N · ω) atTop) := by
-  obtain rfl | hP := eq_or_ne P 0
-  · exact ⟨id, strictMono_id, by simp⟩
-  have : NeZero P := ⟨hP⟩
+  -- We can find a subsequence such that `‖(M (φ n))∞ - N∞‖ₑ ≤ (1 / 2) ^ n`
   have h1 n : ∃ k, ∀ l ≥ k,
       eLpNorm (𝓕.limitProcess (M l) P - 𝓕.limitProcess N P) 2 P ≤ (1 / 2) ^ n := by
     rw [ENNReal.tendsto_atTop_zero] at h
@@ -727,21 +949,16 @@ lemma exists_subsequence_ae_tendsto_uniformly {M : ℕ → ι → Ω → E} {N :
     · suffices Measurable (⨆ t, fun ω ↦ ‖(hM (φ n)).choose t ω - hN.choose t ω‖ₑ) by
         convert this with ω
         simp
-      apply measurable_iSup_of_rightContinuous
-      · intro ω
-        apply IsRightContinuous.continuous_comp (by fun_prop)
-        unfold IsRightContinuous
-        intro t
-        apply ContinuousWithinAt.sub
-        · exact ((hM (φ n)).choose_spec.1.cadlag ω).right_continuous t
-        · exact (hN.choose_spec.1.cadlag ω).right_continuous t
-      · intro t
-        apply StronglyMeasurable.measurable <| continuous_enorm.comp_stronglyMeasurable ?_
-        exact ((hM (φ n)).choose_spec.1.martingale.stronglyMeasurable t).mono (𝓕.le t) |>.sub
-          <| (hN.choose_spec.1.martingale.stronglyMeasurable t).mono (𝓕.le t)
+      refine measurable_iSup_of_rightContinuous (fun ω ↦ ?_) (fun ω ↦ ?_)
+      · exact (((hM (φ n)).choose_spec.1.sub hN.choose_spec.1).isRightContinuous ω).continuous_comp
+          continuous_enorm
+      · exact (continuous_enorm.comp_stronglyMeasurable ((hM (φ n)).choose_spec.1.sub
+          hN.choose_spec.1).martingale.stronglyMeasurable').measurable
     · filter_upwards [(hM (φ n)).choose_spec.2, hN.choose_spec.2] with ω h1 h2
       simp_rw [h1, h2]
   use φ, mφ
+  /- This implies that the series `∑' n, ‖(M (φ n))∞ - N∞‖ₑ` converges, which by Doob's inequality
+  implies that `∑' n, ⨆ t, ‖M (φ n) t ω - N t ω‖ₑ converges. -/
   have : ∫⁻ ω, ∑' n, ⨆ t, ‖M (φ n) t ω - N t ω‖ₑ ∂P < ∞ :=
     calc
     _ = ∑' n, ∫⁻ ω, ⨆ t, ‖M (φ n) t ω - N t ω‖ₑ ∂P := lintegral_tsum aem_iSup
@@ -749,19 +966,16 @@ lemma exists_subsequence_ae_tendsto_uniformly {M : ℕ → ι → Ω → E} {N :
         ∑' n, (∫⁻ ω, (⨆ t, ‖M (φ n) t ω - N t ω‖ₑ) ^ (2 : ℝ) ∂P) ^ (1 / 2 : ℝ) := by
       rw [← ENNReal.tsum_mul_left]
       gcongr
-      grw [← ENNReal.rpow_rpow_inv (y := 2) (x := ∫⁻ ω, ⨆ t, ‖M (φ n) t ω - N t ω‖ₑ ∂P),
-        ENNReal.rpow_lintegral_le', ENNReal.mul_rpow_of_nonneg, one_div]
+      grw [← ENNReal.rpow_rpow_inv (y := 2) (x := ∫⁻ ω, ⨆ t, ‖M (φ n) t ω - N t ω‖ₑ ∂P) (by simp),
+        ENNReal.rpow_lintegral_le' (aem_iSup n) (by simp), ENNReal.mul_rpow_of_nonneg, one_div]
       · norm_num
       · simp
-      · exact aem_iSup n
-      · simp
-      · simp
-    _ ≤ (P Set.univ) ^ (1 / 2 : ℝ) * (2 *
-        ∑' n, eLpNorm (𝓕.limitProcess (M (φ n)) P - 𝓕.limitProcess N P) 2 P) := by
+    _ ≤ (P Set.univ) ^ (1 / 2 : ℝ) * (2 * ∑' n, eLpNorm (𝓕.limitProcess (M (φ n)) P -
+        𝓕.limitProcess N P) 2 P) := by
       rw [← ENNReal.tsum_mul_left (a := 2)]
       gcongr
-      grw [((hM (φ n)).fun_sub hN).integral_iSup_norm_rpow_rpow_inv_le_limitProcess]
-      rw [eLpNorm_congr_ae ((hM (φ n)).limitProcess_fun_sub hN)]
+      grw [((hM (φ n)).fun_sub hN).integral_iSup_norm_rpow_rpow_inv_le_limitProcess,
+        eLpNorm_congr_ae ((hM (φ n)).limitProcess_fun_sub hN)]
       rfl
     _ ≤ (P Set.univ) ^ (1 / 2 : ℝ) * (2 * ∑' n, (1 / 2 : ℝ≥0∞) ^ n) := by grw [hφ]
     _ < ∞ := by
@@ -770,20 +984,16 @@ lemma exists_subsequence_ae_tendsto_uniformly {M : ℕ → ι → Ω → E} {N :
       rw [ENNReal.tsum_geometric]
       simp
   filter_upwards [ae_lt_top' (.tsum aem_iSup) this.ne] with ω h
-  have := ENNReal.tendsto_atTop_zero_of_tsum_ne_top h.ne
-  rw [Metric.tendstoUniformly_iff]
-  intro ε hε
-  rw [ENNReal.tendsto_atTop_zero] at this
-  obtain ⟨n, hn⟩ := this (.ofReal (ε / 2)) (by simpa)
-  rw [@eventually_atTop]
-  use n
-  intro k hk t
+  -- In particular `⨆ t, ‖M (φ n) t ω - N t ω‖ₑ` tends to `0`, so we have uniform convergence.
+  refine Metric.tendstoUniformly_iff.2 fun ε hε ↦ ?_
+  obtain ⟨n, hn⟩ := ENNReal.tendsto_atTop_zero.1 (ENNReal.tendsto_atTop_zero_of_tsum_ne_top h.ne)
+    (.ofReal (ε / 2)) (by simpa)
+  refine eventually_atTop.2 ⟨n, fun k hk t ↦ ?_⟩
   rw [← ENNReal.ofReal_lt_ofReal_iff_of_nonneg (by simp)]
-  · rw [dist_comm, dist_eq_norm, ofReal_norm]
-    grw [le_iSup (fun s ↦ ‖M (φ k) s ω - N s ω‖ₑ), hn k hk]
-    rw [ENNReal.ofReal_lt_ofReal_iff_of_nonneg]
+  · grw [dist_comm, dist_eq_norm, ofReal_norm, le_iSup (fun s ↦ ‖M (φ k) s ω - N s ω‖ₑ), hn k hk,
+      ENNReal.ofReal_lt_ofReal_iff_of_nonneg]
     · simpa
-    positivity
+    · positivity
 
 /- Is in mathlib but not available here for some reason. -/
 @[to_additive]
@@ -792,35 +1002,29 @@ theorem tendsto_iff_enorm_div_tendsto_zero {α E : Type*} [SeminormedCommGroup E
     Tendsto f a (𝓝 b) ↔ Tendsto (fun e => ‖f e / b‖ₑ) a (𝓝 0) := by
   simp only [← edist_eq_enorm_div, ← tendsto_iff_edist_tendsto_0]
 
-instance [SecondCountableTopology ι] :
+/-- The submodule of continuous square integrable martingales is closed in the Hilbert space
+of square integrable martingales. -/
+instance [OrderTopology ι] [SecondCountableTopology ι] :
     IsClosed (continuousSquareIntegrable ι E P 𝓕 : Set (SquareIntegrable ι E P 𝓕)) := by
-  apply IsSeqClosed.isClosed
-  intro M N hM1 hM2
+  refine IsSeqClosed.isClosed fun M N hM1 hM2 ↦ ?_
   have :
       Tendsto (fun n ↦ eLpNorm (𝓕.limitProcess (M n) P - 𝓕.limitProcess N P) 2 P) atTop (𝓝 0) := by
-    rw [tendsto_iff_enorm_sub_tendsto_zero] at hM2
-    simp_rw [SquareIntegrable.enorm_def] at hM2
+    simp_rw [tendsto_iff_enorm_sub_tendsto_zero, SquareIntegrable.enorm_def] at hM2
     refine hM2.congr fun n ↦ ?_
     rw [eLpNorm_congr_ae <| 𝓕.limitProcess_congr (SquareIntegrable.coe_sub (M n) N),
       eLpNorm_congr_ae (IsAESquareIntegrable.limitProcess_sub ?_ ?_)]
-    all_goals exact SquareIntegrable.isSquareIntegrable_coe _ |>.isAESquareIntegrable
+    all_goals exact SquareIntegrable.isAESquareIntegrable_coe _
   obtain ⟨φ, mφ, hφ⟩ := exists_subsequence_ae_tendsto_uniformly
-      (fun n ↦ SquareIntegrable.isSquareIntegrable_coe _ |>.isAESquareIntegrable)
-      (SquareIntegrable.isSquareIntegrable_coe _ |>.isAESquareIntegrable) this
+      (fun n ↦ (M n).isAESquareIntegrable_coe) N.isAESquareIntegrable_coe this
   apply mem_continuousSquareIntegrable
   filter_upwards [hφ] with ω h
-  apply h.continuous
-  exact Frequently.of_forall fun n ↦ continuous_coe (hM1 (φ n)) ω
+  exact h.continuous <| .of_forall fun n ↦ continuous_coe (hM1 (φ n)) ω
 
-variable [SecondCountableTopology ι]
+variable [OrderTopology ι] [SecondCountableTopology ι]
 
 open scoped Classical in
 /-- The continuous martingale part of a square-integrable martingale `X`. This is defined as the
-projection of `X` onto the closed subspace of continuous square-integrable martingales.
-TODO: we rely on the already existing `AEEqFun` machinery, but this is about equivalence classes
-of strongly measurable functions, while here we are interested in undistinguishability only
-so measurablility is the way to go. It seems we will need to duplicate `AEEqFun` for the measurable
-case. -/
+projection of `X` onto the closed subspace of continuous square-integrable martingales. -/
 noncomputable def continuousPart (X : ι → Ω → E) (𝓕 : Filtration ι mΩ) (P : Measure Ω)
     [IsFiniteMeasure P] [SigmaFiniteFiltration P 𝓕] [𝓕.IsComplete P] : ι → Ω → E :=
   if hX : IsAESquareIntegrable X 𝓕 P
@@ -843,45 +1047,64 @@ lemma continuous_continuousPart (X : ι → Ω → E) (ω : Ω) :
   · exact continuous_coe ((continuousSquareIntegrable ι E P 𝓕).starProjection_apply_mem _) ω
   simp [continuous_const]
 
-lemma isSquareIntegrable_continuousPart {X : ι → Ω → E} :
+lemma isSquareIntegrable_continuousPart :
     IsSquareIntegrable (continuousPart X 𝓕 P) 𝓕 P := by
   rw [continuousPart]
   split_ifs
   · exact SquareIntegrable.isSquareIntegrable_coe _
   · exact .const
 
-variable (P 𝓕) in
+lemma IsAESquareIntegrable.mk_continuousPart (hX : IsAESquareIntegrable X 𝓕 P) :
+    .mk (continuousPart X 𝓕 P) isSquareIntegrable_continuousPart.isAESquareIntegrable =
+      (continuousSquareIntegrable ι E P 𝓕).starProjection (.mk X hX) := by
+  ext
+  grw [SquareIntegrable.mk_indist, continuousPart, dif_pos hX]
+
+/-- The purely discontinuous martingale part of a square integrable martingale. Purely discontinuous
+martingales are the orthogonal submodule of continuous square integrable martingales
+in the Hilbert space of square integrable martingales. -/
 noncomputable def discontinuousPart (X : ι → Ω → E) (𝓕 : Filtration ι mΩ) (P : Measure Ω)
     [IsFiniteMeasure P] [SigmaFiniteFiltration P 𝓕] [𝓕.IsComplete P] : ι → Ω → E :=
   X - continuousPart X 𝓕 P
+
+lemma discontinuousPart_def (X : ι → Ω → E) :
+    discontinuousPart X 𝓕 P = X - continuousPart X 𝓕 P := rfl
 
 lemma continuousPart_add_discontinuousPart :
     continuousPart X 𝓕 P + discontinuousPart X 𝓕 P = X := by
   simp [discontinuousPart]
 
+lemma IsAESquareIntegrable.discontinuousPart (hX : IsAESquareIntegrable X 𝓕 P) :
+    IsAESquareIntegrable (discontinuousPart X 𝓕 P) 𝓕 P :=
+  hX.sub isSquareIntegrable_continuousPart.isAESquareIntegrable
+
 variable (ι E P 𝓕) in
+/-- The submodule of purely discontinuous square integrable martingales. Purely discontinuous
+martingales are the orthogonal submodule of continuous square integrable martingales
+in the Hilbert space of square integrable martingales. -/
 noncomputable def discontinuousSquareIntegrable : Submodule ℝ (SquareIntegrable ι E P 𝓕) :=
   (continuousSquareIntegrable ι E P 𝓕).orthogonal
 
 variable (P 𝓕) in
+/-- A process is a purely discontinuous square integrable martingale if it is square integrable
+and orthogonal to every continuous square integrable martingale in the Hilbert space of
+square integrable martingales. -/
 def IsPurelyDiscontinuous (X : ι → Ω → E) : Prop :=
   IsAESquareIntegrable X 𝓕 P ∧
   ∀ Y, IsAESquareIntegrable Y 𝓕 P → (∀ᵐ ω ∂P, Continuous (Y · ω)) →
     P[fun ω ↦ ⟪𝓕.limitProcess X P ω, 𝓕.limitProcess Y P ω⟫] = 0
 
-omit [CompleteSpace E] [IsFiniteMeasure P]
-  [SeparableSpace ι] [OrderTopology ι] [𝓕.IsComplete P] [SecondCountableTopology ι] in
 lemma IsPurelyDiscontinuous.congr (hX : IsPurelyDiscontinuous P 𝓕 X) (h : X ≡ᵐ[P] Y) :
     IsPurelyDiscontinuous P 𝓕 Y := by
-  constructor
-  · exact hX.1.congr h
-  intro Z hZ1 hZ2
+  refine ⟨hX.1.congr h, fun Z hZ1 hZ2 ↦ ?_⟩
   rw [← hX.2 Z hZ1 hZ2]
   apply integral_congr_ae
   filter_upwards [𝓕.limitProcess_congr h] with ω h
   rw [h]
 
-omit [𝓕.IsComplete P] [SecondCountableTopology ι] in
+/-- A purely discontinuous square integrable martingale is in the submodule of purely discontinuous
+square integrable martingales. This statements links the predicate `IsPurelyDiscontinuous`
+with the submodule `discontinuousSquareIntegrable`. -/
 lemma mem_discontinuousSquareIntegrable {Y : SquareIntegrable ι E P 𝓕}
     (hY : IsPurelyDiscontinuous P 𝓕 Y) : Y ∈ discontinuousSquareIntegrable ι E P 𝓕 := by
   rw [discontinuousSquareIntegrable, Submodule.mem_orthogonal']
@@ -890,102 +1113,57 @@ lemma mem_discontinuousSquareIntegrable {Y : SquareIntegrable ι E P 𝓕}
   · exact X.isAESquareIntegrable_coe
   · exact ae_of_all _ <| continuous_coe hX
 
-lemma isPurelyDiscontinuous_discontinuousPart {X : ι → Ω → E}
-    (hX : IsAESquareIntegrable X 𝓕 P) :
+/-- A purely discontinuous square integrable martingale is in the submodule of purely discontinuous
+square integrable martingales. This statements links the predicate `IsPurelyDiscontinuous`
+with the submodule `discontinuousSquareIntegrable`. -/
+lemma IsPurelyDiscontinuous.mk_mem_discontinuousSquareIntegrable
+    (hY : IsPurelyDiscontinuous P 𝓕 Y) :
+    .mk Y hY.1 ∈ discontinuousSquareIntegrable ι E P 𝓕 := by
+  apply mem_discontinuousSquareIntegrable
+  exact hY.congr (SquareIntegrable.mk_indist hY.1).symm
+
+/-- The discontinuous part of square integrable martingale is purely discontinuous. -/
+lemma isPurelyDiscontinuous_discontinuousPart (hX : IsAESquareIntegrable X 𝓕 P) :
     IsPurelyDiscontinuous P 𝓕 (discontinuousPart X 𝓕 P) := by
   constructor
   · exact hX.sub isSquareIntegrable_continuousPart.isAESquareIntegrable
   intro Y hY1 hY2
-  have : ∀ᵐ ω ∂P, ⟪𝓕.limitProcess (discontinuousPart X 𝓕 P) P ω, 𝓕.limitProcess Y P ω⟫ =
-      ⟪𝓕.limitProcess (SquareIntegrable.mk X hX -
-        (continuousSquareIntegrable ι E P 𝓕).starProjection (.mk X hX)) P ω,
-      𝓕.limitProcess (SquareIntegrable.mk Y hY1) P ω⟫ := by
-    rw [discontinuousPart, continuousPart, dif_pos hX]
-    filter_upwards [𝓕.limitProcess_congr ((SquareIntegrable.mk_indist hX).symm.sub .rfl),
-      𝓕.limitProcess_congr (SquareIntegrable.coe_sub (.mk X hX) _),
-      𝓕.limitProcess_congr (SquareIntegrable.mk_indist hY1)] with ω h1 h2 h3
-    rw [h1, h2, h3]
-  simp only
-  rw [integral_congr_ae this, ← SquareIntegrable.inner_def,
-    Submodule.starProjection_inner_eq_zero]
-  apply mem_continuousSquareIntegrable
-  filter_upwards [hY2, SquareIntegrable.mk_indist hY1] with ω h1 h2
-  simp_rw [h2]
-  exact h1
-
-lemma test {X Y Z : ι → Ω → E} (hX1 : IsAESquareIntegrable X 𝓕 P)
-    (hX2 : ∀ᵐ ω ∂P, Continuous (X · ω)) (hY1 : IsAESquareIntegrable Y 𝓕 P)
-    (hY2 : IsPurelyDiscontinuous P 𝓕 Y) (hZ1 : IsAESquareIntegrable Z 𝓕 P)
-    (hZ2 : Z ≡ᵐ[P] X + Y) :
-    X ≡ᵐ[P] continuousPart Z 𝓕 P := by
-  rw [← SquareIntegrable.mk_eq_mk (hX := hZ1) (hY := hX1.add hY1),
-    SquareIntegrable.mk_add (hX := hX1) (hY := hY1)] at hZ2
-  have h1 : .mk X hX1 ∈ continuousSquareIntegrable ι E P 𝓕 := by
-    apply mem_continuousSquareIntegrable
-    filter_upwards [hX2, SquareIntegrable.mk_indist hX1] with ω h1 h2
+  rw! [hX.discontinuousPart.inner_limitProcess_eq hY1, discontinuousPart, SquareIntegrable.mk_sub,
+    hX.mk_continuousPart, Submodule.starProjection_inner_eq_zero]
+  · rfl
+  · apply mem_continuousSquareIntegrable
+    filter_upwards [hY2, SquareIntegrable.mk_indist hY1] with ω h1 h2
     simp_rw [h2]
     exact h1
-  have h2 : .mk Y hY1 ∈ discontinuousSquareIntegrable ι E P 𝓕 := by
-    apply mem_discontinuousSquareIntegrable
-    exact hY2.congr (SquareIntegrable.mk_indist hY1).symm
-  have := Submodule.eq_starProjection_of_mem_orthogonal' h1 h2 hZ2
+
+/-- Uniqueness of the decomposition of a square integrable martingale into a continuous part and
+a discontinuous part: If a square integrable martingale `Z` is indistinguishable from `X + Y`
+where `X` is continuous and `Y` is discontinuous, then `X` is indistinguishable from the
+continuous part of `Z`. -/
+lemma indist_continuousPart (hX1 : IsAESquareIntegrable X 𝓕 P)
+    (hX2 : ∀ᵐ ω ∂P, Continuous (X · ω)) (hY : IsPurelyDiscontinuous P 𝓕 Y)
+    (hZ1 : IsAESquareIntegrable Z 𝓕 P) (hZ2 : Z ≡ᵐ[P] X + Y) :
+    X ≡ᵐ[P] continuousPart Z 𝓕 P := by
+  rw [← SquareIntegrable.mk_eq_mk (hX := hZ1) (hY := hX1.add hY.1),
+    SquareIntegrable.mk_add (hX := hX1) (hY := hY.1)] at hZ2
+  have := Submodule.eq_starProjection_of_mem_orthogonal' (hX1.mk_mem_continuousSquareIntegrable hX2)
+    hY.mk_mem_discontinuousSquareIntegrable hZ2
   rw [continuousPart, dif_pos hZ1, this]
   exact SquareIntegrable.mk_indist hX1 |>.symm
 
-lemma test2 {X Y Z : ι → Ω → E} (hX1 : IsAESquareIntegrable X 𝓕 P)
-    (hX2 : ∀ᵐ ω ∂P, Continuous (X · ω)) (hY1 : IsAESquareIntegrable Y 𝓕 P)
-    (hY2 : IsPurelyDiscontinuous P 𝓕 Y) (hZ1 : IsAESquareIntegrable Z 𝓕 P)
-    (hZ2 : Z ≡ᵐ[P] X + Y) :
+/-- Uniqueness of the decomposition of a square integrable martingale into a continuous part and
+a discontinuous part: If a square integrable martingale `Z` is indistinguishable from `X + Y`
+where `X` is continuous and `Y` is discontinuous, then `Y` is indistinguishable from the
+discontinuous part of `Z`. -/
+lemma indist_discontinuousPart {X Y Z : ι → Ω → E} (hX1 : IsAESquareIntegrable X 𝓕 P)
+    (hX2 : ∀ᵐ ω ∂P, Continuous (X · ω)) (hY2 : IsPurelyDiscontinuous P 𝓕 Y)
+    (hZ1 : IsAESquareIntegrable Z 𝓕 P) (hZ2 : Z ≡ᵐ[P] X + Y) :
     Y ≡ᵐ[P] discontinuousPart Z 𝓕 P := by
-  grw [discontinuousPart, ← test hX1 hX2 hY1 hY2 hZ1 hZ2, hZ2]
+  grw [discontinuousPart, ← indist_continuousPart hX1 hX2 hY2 hZ1 hZ2, hZ2]
   simp
 
-lemma limitProcess_stoppedProcess [MeasurableSpace ι] [OrderBot ι] [BorelSpace ι]
-    {τ : Ω → WithTop ι}
-    (hX1 : Martingale X 𝓕 P) (hX2 : UniformIntegrable X 1 P) (hX3 : ∀ ω, IsRightContinuous (X · ω))
-    (hτ : IsStoppingTime 𝓕 τ) :
-    𝓕.limitProcess (stoppedProcess X τ) P =ᵐ[P] stoppedValue' P 𝓕 X τ := by
-  borelize E
-  apply 𝓕.limitProcess_ae_eq
-  · exact stronglyMeasurable_stoppedValue'
-      (hX1.stronglyAdapted.isStronglyProgressive_of_rightContinuous hX3) hX3 hτ |>.mono sorry
-      -- #42021
-  filter_upwards [hX2.ae_tendsto_limitProcess hX1] with ω h
-  obtain h1 | h1 := eq_or_ne (τ ω) ⊤
-  · simpa [stoppedProcess, stoppedValue', h1]
-  simp only [stoppedProcess, stoppedValue', h1, ↓reduceIte]
-  refine tendsto_const_nhds.congr' (eventually_atTop.2 ⟨(τ ω).untopA, fun t ht ↦ ?_⟩)
-  simp only
-  rw [min_eq_right ((WithTop.untopA_le_iff h1).1 ht)]
-
-lemma IsSquareIntegrable.limitProcess_stoppedProcess [MeasurableSpace ι] [OrderBot ι] [BorelSpace ι]
-    {τ : Ω → WithTop ι}
-    (hX : IsSquareIntegrable X 𝓕 P) (hτ : IsStoppingTime 𝓕 τ) :
-    𝓕.limitProcess (MeasureTheory.stoppedProcess X τ) P =ᵐ[P] stoppedValue' P 𝓕 X τ :=
-  ProbabilityTheory.limitProcess_stoppedProcess hX.martingale hX.uniformIntegrable
-    (fun ω ↦ (hX.cadlag ω).right_continuous) hτ
-
-lemma IsAESquareIntegrable.limitProcess_stoppedProcess
-    [MeasurableSpace ι] [OrderBot ι] [BorelSpace ι] {τ : Ω → WithTop ι}
-    (hX : IsAESquareIntegrable X 𝓕 P) (hτ : IsStoppingTime 𝓕 τ) :
-    𝓕.limitProcess (MeasureTheory.stoppedProcess X τ) P =ᵐ[P] stoppedValue' P 𝓕 X τ := by
-  sorry
-
-lemma stoppedProcess_mem_continuousSquareIntegrable (hX : ∀ᵐ ω ∂P, Continuous (X · ω))
-    (τ : Ω → WithTop ι) :
-    ∀ᵐ ω ∂P, Continuous (stoppedProcess X τ · ω) := by
-  filter_upwards [hX] with ω h
-  simp only [stoppedProcess]
-  obtain h | h := eq_or_ne (τ ω) ⊤
-  · simpa [h]
-  have (x : ι) : (min ↑x (τ ω)).untopA = min x (τ ω).untopA := by
-    obtain h' | h' := le_total x (τ ω).untopA
-    · rw [min_eq_left h', min_eq_left ((WithTop.le_untopA_iff h).1 h')]
-      simp
-    · rw [min_eq_right ((WithTop.untopA_le_iff h).1 h'), min_eq_right h']
-  simp_rw [this]
-  fun_prop
-
+/-- The stopped process of a purely discontinuous square integrable martingale is again
+a purely discontinuous square integrable martingale. -/
 nonrec
 lemma IsPurelyDiscontinuous.stoppedProcess [OrderBot ι] [MeasurableSpace ι] [BorelSpace ι]
     [MeasurableSpace E] [BorelSpace E] [MetrizableSpace ι] [Approximable 𝓕 P]
@@ -993,67 +1171,41 @@ lemma IsPurelyDiscontinuous.stoppedProcess [OrderBot ι] [MeasurableSpace ι] [B
     {τ : Ω → WithTop ι} (hτ : IsStoppingTime 𝓕 τ) :
     IsPurelyDiscontinuous P 𝓕 (stoppedProcess X τ) := by
   refine ⟨hX.1.stoppedProcess hτ, fun Y hY1 hY2 ↦ ?_⟩
-  calc
-  ∫ ω, ⟪𝓕.limitProcess (stoppedProcess X τ) P ω, 𝓕.limitProcess Y P ω⟫ ∂P
-    = ∫ ω, innerSL ℝ (stoppedValue' P 𝓕 X τ ω) (𝓕.limitProcess Y P ω) ∂P := by
-    apply integral_congr_ae
-    filter_upwards [hX.1.limitProcess_stoppedProcess hτ] with ω h
-    simp [h]
-  _ = ∫ ω, innerSL ℝ (stoppedValue' P 𝓕 X τ ω) (stoppedValue' P 𝓕 Y τ ω) ∂P := by
-    rw [← integral_condExp hτ.measurableSpace_le]
-    apply integral_congr_ae
-    have h1 : Integrable (fun ω ↦ ⟪stoppedValue' P 𝓕 X τ ω, 𝓕.limitProcess Y P ω⟫) P := by
-      rw [← memLp_one_iff_integrable]
-      exact (innerSL ℝ).memLp_of_bilin 1 (hX.1.memLp_two_stoppedValue' τ)
-        hY1.memLp_limitProcess
-    filter_upwards [condExp_bilin_of_aestronglyMeasurable_left (innerSL ℝ)
-        (hX.1.aestronglyMeasurable_stoppedValue' hτ) h1
-        (hY1.memLp_limitProcess.integrable (by simp)),
-        hY1.condExp_limitProcess_ae_eq' hτ] with ω h1 h2
-    rw [← h2]
-    exact h1
-  _ = ∫ ω, innerSL ℝ (𝓕.limitProcess X P ω) (stoppedValue' P 𝓕 Y τ ω) ∂P := by
-    nth_rw 2 [← integral_condExp hτ.measurableSpace_le]
-    apply integral_congr_ae
-    have h1 : Integrable (fun ω ↦ innerSL ℝ (𝓕.limitProcess X P ω) (stoppedValue' P 𝓕 Y τ ω)) P := by
-      rw [← memLp_one_iff_integrable]
-      exact (innerSL ℝ).memLp_of_bilin 1 hX.1.memLp_limitProcess
-        (hY1.memLp_two_stoppedValue' τ)
-    filter_upwards [condExp_bilin_of_aestronglyMeasurable_right (innerSL ℝ)
-        (hY1.aestronglyMeasurable_stoppedValue' hτ) h1
-        (hX.1.memLp_limitProcess.integrable (by simp)),
-        hX.1.condExp_limitProcess_ae_eq' hτ] with ω h1 h2
-    rw [← h2]
-    exact h1.symm
-  _ = ∫ ω, ⟪𝓕.limitProcess X P ω, 𝓕.limitProcess (stoppedProcess Y τ) P ω⟫ ∂P := by
-    apply integral_congr_ae
-    filter_upwards [hY1.limitProcess_stoppedProcess hτ] with w h
-    simp [h]
-  _ = 0 := by
-    apply hX.2
-    · exact hY1.stoppedProcess hτ
-    · exact stoppedProcess_mem_continuousSquareIntegrable hY2 τ
+  rw [← hX.2 (stoppedProcess Y τ), ← integral_condExp hτ.measurableSpace_le,
+    ← integral_condExp hτ.measurableSpace_le (f := fun _ ↦ ⟪_, _⟫)]
+  · apply integral_congr_ae
+    grw [condExp_inner_of_aestronglyMeasurable_left,
+      condExp_inner_of_aestronglyMeasurable_right]
+    · filter_upwards [hX.1.limitProcess_stoppedProcess hτ, hX.1.condExp_limitProcess_ae_eq' hτ,
+        hY1.limitProcess_stoppedProcess hτ, hY1.condExp_limitProcess_ae_eq' hτ] with ω h1 h2 h3 h4
+      rw [h1, h2, h3, h4]
+    · exact (hY1.aestronglyMeasurable_stoppedValue' hτ).congr
+        (hY1.limitProcess_stoppedProcess hτ).symm
+    · exact integrable_inner hX.1.memLp_limitProcess (hY1.stoppedProcess hτ).memLp_limitProcess
+    · exact hX.1.memLp_limitProcess.integrable (by simp)
+    · exact (hX.1.aestronglyMeasurable_stoppedValue' hτ).congr
+        (hX.1.limitProcess_stoppedProcess hτ).symm
+    · exact integrable_inner (hX.1.stoppedProcess hτ).memLp_limitProcess hY1.memLp_limitProcess
+    · exact hY1.memLp_limitProcess.integrable (by simp)
+  · exact hY1.stoppedProcess hτ
+  · filter_upwards [hY2] with ω h using h.stoppedProcess τ
 
-variable (X 𝓕 P) in
-lemma key (τ : Ω → WithTop ι) :
-    stoppedProcess X τ =
-      stoppedProcess (continuousPart X 𝓕 P) τ + stoppedProcess (discontinuousPart X 𝓕 P) τ := by
-  nth_rw 1 [← continuousPart_add_discontinuousPart (X := X) (𝓕 := 𝓕) (P := P),
-    stoppedProcess_add]
-
-lemma stoppedProcess_continuousPart [OrderBot ι] [MeasurableSpace ι] [BorelSpace ι]
+/-- The continuous part of the stopped process is the stopped process of the continuous part. -/
+lemma continuousPart_stoppedProcess [OrderBot ι] [MeasurableSpace ι] [BorelSpace ι]
     [MetrizableSpace ι] [Approximable 𝓕 P]
     {X : ι → Ω → E} (hX : IsAESquareIntegrable X 𝓕 P) {τ : Ω → WithTop ι}
     (hτ : IsStoppingTime 𝓕 τ) :
-    continuousPart (stoppedProcess X τ) 𝓕 P ≡ᵐ[P]
-      stoppedProcess (continuousPart X 𝓕 P) τ := by
+    continuousPart (stoppedProcess X τ) 𝓕 P ≡ᵐ[P] stoppedProcess (continuousPart X 𝓕 P) τ := by
+  have : stoppedProcess X τ =
+      stoppedProcess (continuousPart X 𝓕 P) τ + stoppedProcess (discontinuousPart X 𝓕 P) τ := by
+    rw [← stoppedProcess_add, continuousPart_add_discontinuousPart]
   borelize E
   symm
-  apply test (isSquareIntegrable_continuousPart.isAESquareIntegrable.stoppedProcess hτ)
-    (stoppedProcess_mem_continuousSquareIntegrable (ae_of_all _ (continuous_continuousPart X)) τ)
-    ((isPurelyDiscontinuous_discontinuousPart hX).1.stoppedProcess hτ)
+  apply indist_continuousPart
+    (isSquareIntegrable_continuousPart.isAESquareIntegrable.stoppedProcess hτ)
+    (ae_of_all _ (fun ω ↦ (continuous_continuousPart X ω).stoppedProcess τ))
     ((isPurelyDiscontinuous_discontinuousPart hX).stoppedProcess hτ)
-    (hX.stoppedProcess hτ) (by rw [key P X 𝓕 τ])
+    (hX.stoppedProcess hτ) (by rw [this])
 
 attribute [to_fun] stoppedProcess_sub
 
@@ -1063,13 +1215,16 @@ lemma stoppedProcess_discontinuousPart [OrderBot ι] [MeasurableSpace ι] [Borel
     (hτ : IsStoppingTime 𝓕 τ) :
     discontinuousPart (stoppedProcess X τ) 𝓕 P ≡ᵐ[P]
       stoppedProcess (discontinuousPart X 𝓕 P) τ := by
+  have : stoppedProcess X τ =
+      stoppedProcess (continuousPart X 𝓕 P) τ + stoppedProcess (discontinuousPart X 𝓕 P) τ := by
+    rw [← stoppedProcess_add, continuousPart_add_discontinuousPart]
   borelize E
   symm
-  apply test2 (isSquareIntegrable_continuousPart.isAESquareIntegrable.stoppedProcess hτ)
-    (stoppedProcess_mem_continuousSquareIntegrable (ae_of_all _ (continuous_continuousPart X)) τ)
-    ((isPurelyDiscontinuous_discontinuousPart hX).1.stoppedProcess hτ)
+  apply indist_discontinuousPart
+    (isSquareIntegrable_continuousPart.isAESquareIntegrable.stoppedProcess hτ)
+    (ae_of_all _ (fun ω ↦ (continuous_continuousPart X ω).stoppedProcess τ))
     ((isPurelyDiscontinuous_discontinuousPart hX).stoppedProcess hτ)
-    (hX.stoppedProcess hτ) (by rw [key P X 𝓕 τ])
+    (hX.stoppedProcess hτ) (by rw [this])
 
 end Hilbert
 

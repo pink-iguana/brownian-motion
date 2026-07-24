@@ -67,22 +67,15 @@ lemma _root_.MeasureTheory.StronglyAdapted.stoppedProcess_indicator
   (isStable_isStronglyProgressive X (hX.isStronglyProgressive_of_rightContinuous hC)
     τ hτ).stronglyAdapted
 
-variable [MeasurableSpace E] [BorelSpace E] [SecondCountableTopology E] [IsFiniteMeasure P]
+variable [MeasurableSpace E] [BorelSpace E] [IsFiniteMeasure P]
   [Approximable 𝓕 P]
 
 lemma _root_.MeasureTheory.Martingale.stoppedProcess_indicator [CompleteSpace E]
     (hX : Martingale X 𝓕 P) (hC : ∀ ω, IsRightContinuous (X · ω))
     {τ : Ω → WithTop ι} (hτ : IsStoppingTime 𝓕 τ) :
-    Martingale (stoppedProcess (fun i ↦ {ω | ⊥ < τ ω}.indicator (X i)) τ) 𝓕 P := by
-  refine ⟨hX.stronglyAdapted.stoppedProcess_indicator hC hτ, fun i j hij ↦ ?_⟩
-  have : Martingale (fun i ↦ {ω | ⊥ < τ ω}.indicator (X i)) 𝓕 P :=
-    hX.indicator (hτ.measurableSet_gt _)
-  conv_rhs => rw [← stoppedProcess_min_eq_stoppedProcess _ τ hij]
-  refine EventuallyEq.trans ?_ (Martingale.condExp_stoppedValue_ae_eq_stoppedProcess
-    (μ := P) (n := j) this (fun ω ↦ ?_) ((isStoppingTime_const 𝓕 j).min hτ)
-    (fun ω ↦ min_le_left _ _) i)
-  · rw [stoppedProcess_eq_stoppedValue]
-  · exact rightContinuous_indicator (fun ω ↦ hC ω) {ω | ⊥ < τ ω} ω
+    Martingale (stoppedProcess (fun i ↦ {ω | ⊥ < τ ω}.indicator (X i)) τ) 𝓕 P :=
+  (hX.indicator (hτ.measurableSet_gt _)).stoppedProcess
+    (fun ω ↦ rightContinuous_indicator hC _ ω) hτ
 
 /-- Càdlàg martingales are a stable class. -/
 lemma isStable_martingale [CompleteSpace E] :

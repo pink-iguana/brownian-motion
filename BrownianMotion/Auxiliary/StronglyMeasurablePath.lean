@@ -80,6 +80,32 @@ lemma nhdsWithin_inter_Ioi_neBot {ι : Type*} [LinearOrder ι] [TopologicalSpace
   obtain ⟨w, hwo, hwd⟩ := hd.inter_open_nonempty _ (ho.inter isOpen_Ioi) h1
   exact ⟨w, hwo.1, hwd, hwo.2⟩
 
+/-- The set of values taken by a right-continuous process with strongly measurable marginales
+is separable. -/
+theorem isSeparable_iUnion_range_of_stronglyMeasurable_of_isRightContinuous
+    {ι Ω E : Type*} [LinearOrder ι] [TopologicalSpace ι] [SecondCountableTopology ι]
+    [OrderTopology ι] [mΩ : MeasurableSpace Ω] [TopologicalSpace E] {X : ι → Ω → E}
+    (hX : ∀ i, StronglyMeasurable (X i)) (hX_cont : ∀ ω, IsRightContinuous (X · ω)) :
+    IsSeparable (⋃ t, Set.range (X t)) := by
+  obtain ⟨d, hd_count, hd_dense⟩ := exists_countable_dense ι
+  let D : Set ι := d ∪ {x : ι | 𝓝[>] x = ⊥}
+  have hD_count : D.Countable := hd_count.union countable_setOf_isolated_right
+  have hD_ne i (hi : i ∉ D) : (𝓝[>] i).NeBot := ⟨fun h ↦ hi (Set.mem_union_right _ h)⟩
+  obtain ⟨c, hc_count, hc⟩ : IsSeparable (⋃ t : D, Set.range (X t)) := by
+    have : Countable D := hD_count.to_subtype
+    exact IsSeparable.iUnion fun t ↦ (hX t).isSeparable_range
+  refine ⟨c, hc_count, fun x hx ↦ ?_⟩
+  simp only [mem_iUnion, mem_range] at hx
+  obtain ⟨i, ω, rfl⟩ := hx
+  by_cases hi : i ∈ D
+  · exact hc (Set.mem_iUnion.2 ⟨⟨i, hi⟩, ⟨ω, rfl⟩⟩)
+  · have : (𝓝[d ∩ Ioi i] i).NeBot := nhdsWithin_inter_Ioi_neBot hd_dense (hD_ne i hi)
+    have h1 : Tendsto (X · ω) (𝓝[d ∩ Set.Ioi i] i) (𝓝 (X i ω)) :=
+      (hX_cont ω i).mono_left (nhdsWithin_mono i Set.inter_subset_right)
+    refine isClosed_closure.mem_of_tendsto h1 ?_
+    filter_upwards [self_mem_nhdsWithin] with t ht using
+      hc (Set.mem_iUnion.2 ⟨⟨t, Set.mem_union_left _ ht.1⟩, ⟨ω, rfl⟩⟩)
+
 variable {ι Ω E : Type*} [LinearOrder ι] [TopologicalSpace ι] [OrderTopology ι]
   [SecondCountableTopology ι] {mΩ : MeasurableSpace Ω} [NormedAddCommGroup E] {X : ι → Ω → E}
 
