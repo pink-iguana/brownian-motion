@@ -7,7 +7,7 @@ module
 
 public import BrownianMotion.Auxiliary.SeparableSpace
 public import Mathlib.Probability.Process.Adapted
-public import Mathlib.Topology.EMetricSpace.BoundedVariation
+public import Mathlib.Topology.EMetricSpace.VariationOnFromTo
 
 /-!
 # The variation process
