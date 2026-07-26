@@ -234,12 +234,10 @@ theorem measurable_eVariationOn_of_continuousWithinAt_Ioi [OrderTopology ι]
     Measurable[m] fun ω ↦ eVariationOn (X · ω) s := by
   obtain ⟨t, ht, htc, hts⟩ : ∃ t : Set s, Dense t ∧ t.Countable ∧ {x : s | 𝓝[>] x = ⊥} ⊆ t := by
     obtain ⟨d, hdc, hdd⟩ := exists_countable_dense s
+    refine ⟨d ∪ {x : s | 𝓝[>] x = ⊥}, hdd.mono subset_union_left, hdc.union ?_, subset_union_right⟩
     have hsub : {x : s | 𝓝[>] x = ⊥} ⊆ Subtype.val ⁻¹' {x ∈ s | 𝓝[s ∩ Ioi x] x = ⊥} :=
       fun x hx ↦ ⟨x.2, (nhdsGT_subtype_eq_bot_iff x.2).1 hx⟩
-    have hisoc : {x : s | 𝓝[>] x = ⊥}.Countable :=
-      ((countable_setOf_isolated_right_within (s := s)).preimage Subtype.val_injective).mono hsub
-    exact ⟨d ∪ {x : s | 𝓝[>] x = ⊥}, hdd.mono subset_union_left, hdc.union hisoc,
-      subset_union_right⟩
+    exact ((countable_setOf_isolated_right_within).preimage Subtype.val_injective).mono hsub
   simp only [fun ω ↦ eVariationOn_eq_comp_val_of_dense_Ioi ht hts (hcont ω)]
   exact measurable_eVariationOn_of_countable (htc.image _) fun i hi ↦ hX i
     (Subtype.coe_image_subset s t hi)
