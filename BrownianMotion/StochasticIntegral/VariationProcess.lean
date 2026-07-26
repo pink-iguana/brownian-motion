@@ -44,7 +44,7 @@ noncomputable def variationProcess (X : ι → Ω → E) (a : ι) : ι → Ω �
 converted to a real number. -/
 theorem variationProcess_eq_toReal_eVariationOn_Icc (X : ι → Ω → E) {a t : ι} (hat : a ≤ t)
     (ω : Ω) : variationProcess X a t ω = (eVariationOn (X · ω) (Icc a t)).toReal := by
-  simp [variationProcess, variationOnFromTo, univ_inter, hat]
+  simp [variationProcess, variationOnFromTo, hat]
 
 /-- For `a ≤ t` the variation process is nonnegative. It can be negative for `t < a`, where it
 takes the signed value `-(eVariationOn (X · ω) (Icc t a)).toReal`. -/
