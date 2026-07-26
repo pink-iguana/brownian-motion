@@ -6,22 +6,10 @@ Authors: Rémy Degenne
 module
 
 public import BrownianMotion.Auxiliary.AEEq
-public import BrownianMotion.Auxiliary.Indistinguishable
-public import BrownianMotion.Auxiliary.Martingale
-public import BrownianMotion.Auxiliary.StoppedProcess
-public import BrownianMotion.Auxiliary.StoppedValue
-public import BrownianMotion.StochasticIntegral.LocalMartingale
-public import Mathlib.Probability.Notation
-
-import BrownianMotion.Auxiliary.Analysis
-import BrownianMotion.Auxiliary.LimitProcess
-import BrownianMotion.Auxiliary.MeanInequalities
-import BrownianMotion.Auxiliary.MeasureTheory
-import BrownianMotion.Gaussian.StochasticProcesses
-import BrownianMotion.StochasticIntegral.ClassD
-import BrownianMotion.StochasticIntegral.DoobLp
-import Mathlib.MeasureTheory.Function.Holder
-import Mathlib.MeasureTheory.Integral.Average
+public import BrownianMotion.Auxiliary.MeanInequalities
+public import BrownianMotion.Auxiliary.MeasureTheory
+public import BrownianMotion.StochasticIntegral.ClassD
+public import BrownianMotion.StochasticIntegral.DoobLp
 
 /-! # Square integrable martingales
 
@@ -322,6 +310,7 @@ lemma IsSquareIntegrable.iSup_lintegral_pow_two_eq (hX : IsSquareIntegrable X �
   simp only
   rw [ENNReal.rpow_iSup _ (by simp)]
   convert hX.iSup_eLpNorm_eq_eLpNorm_limitProcess
+  · rfl
   · rw [eLpNorm_eq_eLpNorm', eLpNorm']
     all_goals simp
   · rw [eLpNorm_eq_eLpNorm', eLpNorm']
@@ -1118,7 +1107,7 @@ omit [𝓕.IsComplete P] in
 /-- The stopped process of a purely discontinuous square integrable martingale is again
 a purely discontinuous square integrable martingale. -/
 nonrec
-lemma IsPurelyDiscontinuous.stoppedProcess [OrderBot ι] [MetrizableSpace ι] [Approximable 𝓕 P]
+lemma IsPurelyDiscontinuous.stoppedProcess [OrderBot ι] [Approximable 𝓕 P]
     (hX : IsPurelyDiscontinuous X 𝓕 P) (hτ : IsStoppingTime 𝓕 τ) :
     IsPurelyDiscontinuous (stoppedProcess X τ) 𝓕 P := by
   borelize ι
@@ -1143,8 +1132,7 @@ lemma IsPurelyDiscontinuous.stoppedProcess [OrderBot ι] [MetrizableSpace ι] [A
   · filter_upwards [hY2] with ω h using h.stoppedProcess τ
 
 /-- The continuous part of the stopped process is the stopped process of the continuous part. -/
-lemma continuousPart_stoppedProcess [OrderBot ι] [MeasurableSpace ι] [BorelSpace ι]
-    [MetrizableSpace ι] [Approximable 𝓕 P]
+lemma continuousPart_stoppedProcess [OrderBot ι] [Approximable 𝓕 P]
     {X : ι → Ω → E} (hX : IsAESquareIntegrable X 𝓕 P) {τ : Ω → WithTop ι}
     (hτ : IsStoppingTime 𝓕 τ) :
     continuousPart (stoppedProcess X τ) 𝓕 P ≡ᵐ[P] stoppedProcess (continuousPart X 𝓕 P) τ := by
@@ -1161,7 +1149,9 @@ lemma continuousPart_stoppedProcess [OrderBot ι] [MeasurableSpace ι] [BorelSpa
 
 attribute [to_fun] stoppedProcess_sub
 
-lemma stoppedProcess_discontinuousPart [OrderBot ι] [Approximable 𝓕 P]
+/-- The discontinuous part of the stopped process is
+the stopped process of the discontinuous part. -/
+lemma discontinuousPart_stoppedProcess [OrderBot ι] [Approximable 𝓕 P]
     {X : ι → Ω → E} (hX : IsAESquareIntegrable X 𝓕 P) {τ : Ω → WithTop ι}
     (hτ : IsStoppingTime 𝓕 τ) :
     discontinuousPart (stoppedProcess X τ) 𝓕 P ≡ᵐ[P]
