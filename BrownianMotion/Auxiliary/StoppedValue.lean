@@ -99,15 +99,15 @@ private lemma IsStoppingTime.stronglyMeasurable_limitProcess_indicator_eq_top
   rw [stronglyMeasurable_iff_measurable_separable]
   refine ⟨fun s hs ↦ (hτ.measurableSet _).2 ⟨?_, fun t ↦ ?_⟩,
     (𝓕.stronglyMeasurable_limit_process'.indicator hτ.measurableSet_eq_top).isSeparable_range⟩
-  · exact hs.preimage (𝓕.stronglyMeasurable_limit_process'.measurable.indicator
-      hτ.measurableSet_eq_top)
+  · exact hs.preimage (𝓕.stronglyMeasurable_limitProcess.measurable.indicator
+      hτ.measurableSet_eq_top')
   have : MeasurableSet[𝓕 t] ({ω | 0 ∈ s} ∩ {ω | τ ω ≤ t}) := by
     by_cases h : 0 ∈ s
     · simpa [h] using hτ t
     · simp [h]
   convert this using 1
   ext ω
-  simp only [Set.mem_inter_iff, Set.mem_preimage, Set.mem_setOf_eq, and_congr_left_iff]
+  simp only [Set.mem_inter_iff, Set.mem_preimage, Set.mem_ofPred_eq, and_congr_left_iff]
   intro h
   have : τ ω ≠ ⊤ := ne_top_of_le_ne_top (by simp) h
   simp [Set.indicator, this]
@@ -139,7 +139,10 @@ lemma Filtration.stronglyMeasurable_stoppedValue' [Zero E] [OrderBot ι]
   rw [this]
   refine hτ.stronglyMeasurable_limitProcess_indicator_eq_top.piecewise ?_
     (stronglyMeasurable_stoppedValue hX hRC hτ)
-  sorry -- #42021
+  refine (hτ.measurableSet _).2 ⟨hτ.measurableSet_eq_top', fun t ↦ ?_⟩
+  convert MeasurableSet.empty
+  ext
+  simp +contextual
 
 end Measurability
 

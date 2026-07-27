@@ -142,7 +142,7 @@ lemma integral_elemPredSetOfSeq [OrderBot ι] {t : ι} (n : ℕ) {idx : ℕ → 
     simp only [hchoose]
     rcases hW01 k (hKmem hk).1 ω with h0 | h1
     · simp [h0]
-    · simp [h1, hst]
+    · simp [h1, hst, -stoppedProcess_of_eq_coe]
   · -- terms outside K vanish
     have hno : ¬ idx k < idx (k + 1) := fun h ↦ hkK (by simp [K, mem_range.1 hk, h])
     have heq : idx (k + 1) = idx k :=

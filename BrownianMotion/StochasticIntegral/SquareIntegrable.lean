@@ -10,6 +10,7 @@ public import BrownianMotion.Auxiliary.MeanInequalities
 public import BrownianMotion.Auxiliary.MeasureTheory
 public import BrownianMotion.StochasticIntegral.ClassD
 public import BrownianMotion.StochasticIntegral.DoobLp
+public import BrownianMotion.StochasticIntegral.QuasiMartingale.CadlagModification
 
 /-! # Square integrable martingales
 
@@ -24,6 +25,10 @@ namespace ProbabilityTheory
 
 variable {ι Ω E : Type*} [NormedAddCommGroup E]
   {mΩ : MeasurableSpace Ω} {P : Measure Ω}
+
+section LinearOrder
+
+variable [LinearOrder ι] [TopologicalSpace ι]
   {X Y Z : ι → Ω → E} {𝓕 : Filtration ι mΩ} {τ : Ω → WithTop ι}
 
 section IsSquareIntegrable
@@ -147,13 +152,6 @@ lemma isSquareIntegrable_of_isEmpty [IsEmpty Ω]
     exfalso
     exact isEmptyElim ω
   · simp
-
-@[simp]
-lemma isLocallySquareIntegrable_of_isEmpty [OrderBot ι] [OrderTopology ι] [IsEmpty Ω]
-    (X : ι → Ω → E) (𝓕 : Filtration ι mΩ) (P : Measure Ω) :
-    IsLocallySquareIntegrable X 𝓕 P := by
-  refine IsSquareIntegrable.isLocallySquareIntegrable ?_
-  exact isSquareIntegrable_of_isEmpty _ _ _
 
 lemma isSquareIntegrable_of_le_const (h_mart : Martingale X 𝓕 P) (h_cadlag : ∀ ω, IsCadlag (X · ω))
     {C : ℝ≥0} (h_bound : ∀ i, eLpNorm (X i) 2 P ≤ C) :
@@ -337,7 +335,7 @@ lemma iSup_eLpNorm_le_eLpNorm_limitProcess (hX1 : Martingale X 𝓕 P)
     ⨆ t, eLpNorm (X t) 2 P ≤ eLpNorm (𝓕.limitProcess X P) 2 P := by
   refine iSup_le fun t ↦ ?_
   rw [eLpNorm_congr_ae (hX1.condExp_limitProcess_ae_eq hX3 hX2 t).symm]
-  exact eLpNorm_condExp_le_eLpNorm (by simp) _
+  exact eLpNorm_condExp_le_eLpNorm _ (by simp)
 
 lemma isSquareIntegrable_of_limitProcess [CompleteSpace E] [IsFiniteMeasure P]
     (hX1 : Martingale X 𝓕 P) (hX2 : ∀ ω, IsCadlag (X · ω))
@@ -545,6 +543,24 @@ instance : AddCommGroup (SquareIntegrable E P 𝓕) :=
 instance : Module ℝ (SquareIntegrable E P 𝓕) :=
   Submodule.module (squareIntegrableSubmodule E P 𝓕)
 
+lemma SquareIntegrable.val_add (X Y : SquareIntegrable E P 𝓕) : (X + Y).1 = X.1 + Y.1 :=
+  Submodule.coe_add X Y
+
+lemma SquareIntegrable.val_sub (X Y : SquareIntegrable E P 𝓕) : (X - Y).1 = X.1 - Y.1 :=
+  Submodule.coe_sub _ X Y
+
+lemma SquareIntegrable.val_smul (X : SquareIntegrable E P 𝓕) (c : ℝ) : (c • X).1 = c • X.1 :=
+  Submodule.coe_smul c X
+
+lemma SquareIntegrable.val_neg (X : SquareIntegrable E P 𝓕) : (-X).1 = -X.1 :=
+  Submodule.coe_neg _ X
+
+lemma SquareIntegrable.val_zero : (0 : SquareIntegrable E P 𝓕).1 = 0 :=
+  Submodule.coe_zero
+
+lemma SquareIntegrable.val_inj (X Y : SquareIntegrable E P 𝓕) : X = Y ↔ X.1 = Y.1 :=
+  Subtype.ext_iff
+
 /-- The equivalence class of a process that is indistinguishable from a square integrable
 martingale. -/
 noncomputable def SquareIntegrable.mk (X : ι → Ω → E) (hX : IsAESquareIntegrable X 𝓕 P) :
@@ -589,23 +605,19 @@ lemma SquareIntegrable.ext {X Y : SquareIntegrable E P 𝓕} (h : ↑X ≡ᵐ[P]
 
 lemma SquareIntegrable.coe_add (X Y : SquareIntegrable E P 𝓕) :
     ↑(X + Y) ≡ᵐ[P] ↑X + ↑Y := by
-  unfold SquareIntegrable
-  grw [← val_indist_coe, Submodule.coe_add, coeFn_add, val_indist_coe, val_indist_coe]
+  grw [← val_indist_coe, val_add, coeFn_add, ← val_indist_coe, ← val_indist_coe]
 
 lemma SquareIntegrable.coe_sub (X Y : SquareIntegrable E P 𝓕) :
     ↑(X - Y) ≡ᵐ[P] ↑X - ↑Y := by
-  unfold SquareIntegrable
-  grw [← val_indist_coe, Submodule.coe_sub, coeFn_sub, val_indist_coe, val_indist_coe]
+  grw [← val_indist_coe, val_sub, coeFn_sub, val_indist_coe, val_indist_coe]
 
 lemma SquareIntegrable.coe_smul (X : SquareIntegrable E P 𝓕) (c : ℝ) :
     ↑(c • X) ≡ᵐ[P] c • ↑X := by
-  unfold SquareIntegrable
-  grw [← val_indist_coe, Submodule.coe_smul, coeFn_smul, val_indist_coe]
+  grw [← val_indist_coe, val_smul, coeFn_smul, val_indist_coe]
 
 lemma SquareIntegrable.coe_neg (X : SquareIntegrable E P 𝓕) :
     ↑(-X) ≡ᵐ[P] -↑X := by
-  unfold SquareIntegrable
-  grw [← val_indist_coe, Submodule.coe_neg, coeFn_neg, val_indist_coe]
+  grw [← val_indist_coe, val_neg, coeFn_neg, val_indist_coe]
 
 private lemma SquareIntegrable.val_mk (X : ι → Ω → E) (hX : IsAESquareIntegrable X 𝓕 P)
     (h : AEStronglyAdapted X 𝓕 P) :
@@ -619,8 +631,7 @@ lemma SquareIntegrable.mk_eq_mk {hX : IsAESquareIntegrable X 𝓕 P}
     {hY : IsAESquareIntegrable Y 𝓕 P} :
     mk X hX = mk Y hY ↔ X ≡ᵐ[P] Y where
   mp h := by
-    unfold SquareIntegrable at h
-    rw [Subtype.ext_iff, mk, mk] at h
+    rw [SquareIntegrable.val_inj, mk, mk] at h
     rwa [AEEqProcess.mk_eq_mk] at h
   mpr h := by
     ext
@@ -646,8 +657,7 @@ lemma SquareIntegrable.coe_const (c : E) :
 variable (E P 𝓕) in
 lemma SquareIntegrable.coe_zero :
     (0 : SquareIntegrable E P 𝓕) ≡ᵐ[P] 0 := by
-  unfold SquareIntegrable
-  grw [← val_indist_coe, Submodule.coe_zero, coeFn_zero]
+  grw [← val_indist_coe, val_zero, coeFn_zero]
 
 variable [Nonempty ι]
 
@@ -794,7 +804,7 @@ lemma isSquareIntegrable_modif_condExp {X : Ω → E} (hX : MemLp X 2 P) :
   martingale := martingale_modif
   cadlag := isCadlag_modif _
   bounded := by
-    refine LE.le.trans_lt (iSup_le fun i ↦ ?_) hX.2
+    refine (iSup_le fun i ↦ ?_).trans_lt hX.2
     grw [eLpNorm_congr_ae (modification_modif (martingale_condExp X 𝓕 P) i),
       eLpNorm_condExp_le_eLpNorm _ (by simp)]
 
@@ -1266,6 +1276,13 @@ variable [ConditionallyCompleteLinearOrderBot ι] [TopologicalSpace ι] [OrderTo
   [NormedSpace ℝ E]
   {X : ι → Ω → E} {𝓕 : Filtration ι mΩ} [𝓕.IsComplete P] [𝓕.IsRightContinuous] [IsFiniteMeasure P]
   [Approximable 𝓕 P]
+
+@[simp]
+lemma isLocallySquareIntegrable_of_isEmpty [IsEmpty Ω]
+    (X : ι → Ω → E) (𝓕 : Filtration ι mΩ) (P : Measure Ω) :
+    IsLocallySquareIntegrable X 𝓕 P := by
+  refine IsSquareIntegrable.isLocallySquareIntegrable ?_
+  exact isSquareIntegrable_of_isEmpty _ _ _
 
 lemma _root_.MeasureTheory.Martingale.isLocallySquareIntegrable_of_jump_le
     [PolishSpace ι] [CompleteSpace E] [SecondCountableTopology E]
