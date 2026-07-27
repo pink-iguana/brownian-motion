@@ -34,9 +34,7 @@ omit [Nonempty ι] in
 lemma limitProcess_congr {X Y : ι → Ω → E} (hXY : X ≡ᵐ[P] Y) :
     𝓕.limitProcess X P =ᵐ[P] 𝓕.limitProcess Y P := by
   obtain h | _ := isEmpty_or_nonempty ι
-  · have : X = Y := by
-      ext i
-      exact h.elim' i
+  · have : X = Y := by ext i; exact h.elim' i
     rw [this]
   rw [Filtration.limitProcess]
   split_ifs with h

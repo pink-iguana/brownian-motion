@@ -45,14 +45,16 @@ lemma Submartingale.IsLocalSubmartingale [LE E]
     IsLocalSubmartingale X 𝓕 P :=
   .of_prop ⟨hX, hC⟩
 
-variable [SecondCountableTopology ι] [MeasurableSpace ι] [BorelSpace ι]
+variable [SecondCountableTopology ι]
 
-lemma IsLocalMartingale.locally_isStronglyProgressive (hX : IsLocalMartingale X 𝓕 P) :
+lemma IsLocalMartingale.locally_isStronglyProgressive [MeasurableSpace ι] [BorelSpace ι]
+    (hX : IsLocalMartingale X 𝓕 P) :
     Locally (IsStronglyProgressive 𝓕) 𝓕 X P :=
   Locally.mono (fun _ ⟨hX, hC⟩ ↦ hX.stronglyAdapted.isStronglyProgressive_of_rightContinuous
     (fun ω ↦ (hC ω).right_continuous)) hX
 
-lemma IsLocalSubmartingale.locally_isStronglyProgressive [LE E] (hX : IsLocalSubmartingale X 𝓕 P) :
+lemma IsLocalSubmartingale.locally_isStronglyProgressive [MeasurableSpace ι] [BorelSpace ι] [LE E]
+    (hX : IsLocalSubmartingale X 𝓕 P) :
     Locally (IsStronglyProgressive 𝓕) 𝓕 X P :=
   Locally.mono (fun _ ⟨hX, hC⟩ ↦ hX.stronglyAdapted.isStronglyProgressive_of_rightContinuous
     (fun ω ↦ (hC ω).right_continuous)) hX
@@ -63,12 +65,12 @@ omit [NormedSpace ℝ E] in
 lemma _root_.MeasureTheory.StronglyAdapted.stoppedProcess_indicator
     (hX : StronglyAdapted 𝓕 X) (hC : ∀ ω, IsRightContinuous (X · ω))
     {τ : Ω → WithTop ι} (hτ : IsStoppingTime 𝓕 τ) :
-    StronglyAdapted 𝓕 (stoppedProcess (fun i ↦ {ω | ⊥ < τ ω}.indicator (X i)) τ) :=
-  (isStable_isStronglyProgressive X (hX.isStronglyProgressive_of_rightContinuous hC)
+    StronglyAdapted 𝓕 (stoppedProcess (fun i ↦ {ω | ⊥ < τ ω}.indicator (X i)) τ) := by
+  borelize ι
+  exact (isStable_isStronglyProgressive X (hX.isStronglyProgressive_of_rightContinuous hC)
     τ hτ).stronglyAdapted
 
-variable [MeasurableSpace E] [BorelSpace E] [IsFiniteMeasure P]
-  [Approximable 𝓕 P]
+variable [IsFiniteMeasure P] [Approximable 𝓕 P]
 
 lemma _root_.MeasureTheory.Martingale.stoppedProcess_indicator [CompleteSpace E]
     (hX : Martingale X 𝓕 P) (hC : ∀ ω, IsRightContinuous (X · ω))

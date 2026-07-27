@@ -21,9 +21,7 @@ namespace Martingale
 
 variable {ι Ω E : Type*} [LinearOrder ι] [TopologicalSpace ι] [OrderTopology ι]
   [OrderBot ι] [SecondCountableTopology ι]
-  [NormedAddCommGroup E]
-  [MeasurableSpace E] [BorelSpace E]
-  [MetrizableSpace ι] [NormedSpace ℝ E] [CompleteSpace E]
+  [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
   {mΩ : MeasurableSpace Ω} {𝓕 : Filtration ι mΩ} {μ : Measure Ω} [IsFiniteMeasure μ]
   {X : ι → Ω → E} {τ σ : Ω → WithTop ι} {n : ι}
 
@@ -179,9 +177,8 @@ theorem condExp_stoppedValue_ae_eq_stoppedProcess [Approximable 𝓕 μ] {n : ι
   exact EventuallyEq.trans (Eq.eventuallyEq <| by simp)
     (stoppedValue_min_ae_eq_condExp' h hRC hτ (isStoppingTime_const 𝓕 i) hτ_le).symm
 
-lemma stoppedProcess [Approximable 𝓕 μ]
-    (h : Martingale X 𝓕 μ) (hRC : ∀ ω, IsRightContinuous (X · ω))
-    (hτ : IsStoppingTime 𝓕 τ) :
+lemma stoppedProcess [Approximable 𝓕 μ] [PseudoMetrizableSpace ι]
+    (h : Martingale X 𝓕 μ) (hRC : ∀ ω, IsRightContinuous (X · ω)) (hτ : IsStoppingTime 𝓕 τ) :
     Martingale (stoppedProcess X τ) 𝓕 μ := by
   borelize ι
   constructor

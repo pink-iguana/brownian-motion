@@ -37,6 +37,8 @@ section Topology
 
 variable [TopologicalSpace ι] [OrderTopology ι] [TopologicalSpace E]
 
+/-- If a trajectory of a process is continuous, then the corresponding trajectory of the stopped
+process is also continuous. -/
 lemma _root_.Continuous.stoppedProcess {ω : Ω} (hX : Continuous (X · ω)) (τ : Ω → WithTop ι) :
     Continuous (stoppedProcess X τ · ω) := by
   cases h : τ ω with
@@ -45,6 +47,8 @@ lemma _root_.Continuous.stoppedProcess {ω : Ω} (hX : Continuous (X · ω)) (τ
     simp only [h, WithTop.coe_inj, stoppedProcess_of_eq_coe]
     fun_prop
 
+/-- If a trajectory of a process is right-continuous,
+then the corresponding trajectory of the stopped process is also right-continuous. -/
 lemma _root_.IsRightContinuous.stoppedProcess (hX : IsRightContinuous (X · ω)) (τ : Ω → WithTop ι) :
     IsRightContinuous (stoppedProcess X τ · ω) := by
   cases h : τ ω with
@@ -53,10 +57,11 @@ lemma _root_.IsRightContinuous.stoppedProcess (hX : IsRightContinuous (X · ω))
     simp only [h, WithTop.coe_inj, stoppedProcess_of_eq_coe]
     intro s
     obtain hst | hts := lt_or_ge s t
-    · exact hX (min s t) |>.comp (f := (min · t)) (by fun_prop)
-        (by grind [Set.MapsTo])
+    · exact hX (min s t) |>.comp (f := (min · t)) (by fun_prop) (by grind [Set.MapsTo])
     · exact (continuous_const (y := X t ω)).continuousWithinAt.congr (by grind) (by grind)
 
+/-- If a trajectory of a process is càdlàg, then the corresponding trajectory of the stopped
+process is also càdlàg. -/
 lemma _root_.IsCadlag.stoppedProcess (hX : IsCadlag (X · ω)) (τ : Ω → WithTop ι) :
     IsCadlag (stoppedProcess X τ · ω) := by
   cases h : τ ω with

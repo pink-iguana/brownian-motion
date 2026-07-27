@@ -80,11 +80,11 @@ lemma nhdsWithin_inter_Ioi_neBot {ι : Type*} [LinearOrder ι] [TopologicalSpace
   obtain ⟨w, hwo, hwd⟩ := hd.inter_open_nonempty _ (ho.inter isOpen_Ioi) h1
   exact ⟨w, hwo.1, hwd, hwo.2⟩
 
-/-- The set of values taken by a right-continuous process with strongly measurable marginales
+/-- The set of values taken by a right-continuous process with strongly measurable marginals
 is separable. -/
 theorem isSeparable_iUnion_range_of_stronglyMeasurable_of_isRightContinuous
     {ι Ω E : Type*} [LinearOrder ι] [TopologicalSpace ι] [SecondCountableTopology ι]
-    [OrderTopology ι] [mΩ : MeasurableSpace Ω] [TopologicalSpace E] {X : ι → Ω → E}
+    [OrderTopology ι] [MeasurableSpace Ω] [TopologicalSpace E] {X : ι → Ω → E}
     (hX : ∀ i, StronglyMeasurable (X i)) (hX_cont : ∀ ω, IsRightContinuous (X · ω)) :
     IsSeparable (⋃ t, Set.range (X t)) := by
   obtain ⟨d, hd_count, hd_dense⟩ := exists_countable_dense ι

@@ -9,13 +9,13 @@ open MeasureTheory
 
 namespace ENNReal
 
-lemma rpow_lintegral_le' {X : Type*} {mX : MeasurableSpace X} {μ : Measure X}
-    [IsFiniteMeasure μ] {f : X → ℝ≥0∞} (hf1 : AEMeasurable f μ) {r : ℝ} (hr : 1 ≤ r) :
+lemma rpow_lintegral_le {X : Type*} {mX : MeasurableSpace X} {μ : Measure X}
+    [IsFiniteMeasure μ] {f : X → ℝ≥0∞} (hf : AEMeasurable f μ) {r : ℝ} (hr : 1 ≤ r) :
     (∫⁻ x, f x ∂μ) ^ r ≤ (μ Set.univ) ^ (r - 1) * ∫⁻ x, (f x) ^ r ∂μ := calc
   (∫⁻ x, f x ∂μ) ^ r
     = (eLpNorm' f 1 μ) ^ r := by simp [eLpNorm']
   _ ≤ (μ Set.univ) ^ (r - 1) * ∫⁻ x, (f x) ^ r ∂μ := by
-    grw [mul_comm, eLpNorm'_le_eLpNorm'_mul_rpow_measure_univ (by simp) hr hf1.aestronglyMeasurable,
+    grw [mul_comm, eLpNorm'_le_eLpNorm'_mul_rpow_measure_univ (by simp) hr hf.aestronglyMeasurable,
       mul_rpow_of_nonneg _ _ (by linarith), ← rpow_mul, eLpNorm', one_div,
       rpow_inv_rpow (by linarith)]
     field_simp

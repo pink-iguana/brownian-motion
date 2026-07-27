@@ -287,11 +287,70 @@ lemma UniformIntegrable.condExp {X : ι → Ω → E} [NormedAddCommGroup E] [No
     UniformIntegrable (fun i ↦ μ[X i | 𝓕 i]) 1 μ :=
   (hX.condExp' h𝓕).comp (fun i ↦ (i, i))
 
+/-- If a a family of random variables in bounded in `Lp` for `p > q ≥ 1`, then it is uniformly
+integrable in `Lq`. -/
 lemma uniformIntegrable_of_eLpNorm_le {X : ι → Ω → E} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    [CompleteSpace E] [IsFiniteMeasure μ] (p : ℝ≥0∞) (hp : 1 < p)
-    (C : ℝ≥0∞) (hC : C ≠ ∞) (hX : ∀ i, eLpNorm (X i) p μ ≤ C) :
-    UniformIntegrable X 1 μ := by
-  sorry
+    [CompleteSpace E] [IsFiniteMeasure μ] (hX1 : ∀ i, AEStronglyMeasurable (X i) μ)
+    (p q : ℝ≥0∞) (hp : q < p) (hq : 1 ≤ q) (C : ℝ≥0∞) (hC : C ≠ ∞)
+    (hX2 : ∀ i, eLpNorm (X i) p μ ≤ C) :
+    UniformIntegrable X q μ := by
+  lift C to ℝ≥0 using hC
+  have hq' : q ≠ ∞ := by
+    contrapose hp
+    simp [hp]
+  obtain rfl | hC := eq_or_ne C 0
+  · have (t : ι) : X t =ᵐ[μ] 0 := by
+      rw [← eLpNorm_eq_zero_iff (p := p) (hX1 t)]
+      · simpa using hX2 t
+      · exact zero_le.trans_lt hp |>.ne'
+    rw [uniformIntegrable_iff hq hq']
+    refine ⟨hX1, fun ε hε ↦ ⟨0, fun t ↦ ?_⟩⟩
+    simp [eLpNorm_congr_ae (this t)]
+  refine ⟨hX1, fun ε hε ↦ ?_, ?_⟩
+  · have {s : Set Ω} (hs : MeasurableSet s) (t : ι) :
+        eLpNorm (s.indicator (X t)) q μ ≤
+          (eLpNorm (X t) p μ) * (μ s) ^ (q⁻¹ - p⁻¹).toReal := calc
+      eLpNorm (s.indicator (X t)) q μ
+        = eLpNorm ((s.indicator (fun _ ↦ 1 : Ω → ℝ)) • (X t)) q μ := by
+        congr with ω
+        simp [Set.indicator]
+      _ ≤ eLpNorm (s.indicator (fun _ ↦ 1 : Ω → ℝ)) (q⁻¹ - p⁻¹)⁻¹ μ *
+          eLpNorm (X t) p μ := by
+        have : (q⁻¹ - p⁻¹)⁻¹.HolderTriple p q := ⟨by
+          rw [inv_inv, tsub_add_cancel_of_le (by simp [hp.le])]⟩
+        grw [← eLpNorm_smul_le_mul_eLpNorm (r := q) (hX1 t)]
+        exact aestronglyMeasurable_const.indicator hs
+      _ = (eLpNorm (X t) p μ) * (μ s) ^ (q⁻¹ - p⁻¹).toReal := by
+        rw [eLpNorm_indicator_const hs, mul_comm]
+        · simp
+        · simp only [ne_eq, ENNReal.inv_eq_zero, ENNReal.sub_eq_top_iff, ENNReal.inv_eq_top,
+            not_and, Decidable.not_not]
+          intro
+          simp_all
+        · simpa [tsub_eq_zero_iff_le]
+    refine ⟨(ε / C) ^ (q⁻¹ - p⁻¹)⁻¹.toReal, by positivity, fun t s hs hμs ↦ ?_⟩
+    grw [this hs t, hμs, hX2, ENNReal.ofReal_rpow_of_nonneg, ENNReal.toReal_inv,
+      Real.rpow_inv_rpow, show (C : ℝ≥0∞) = .ofReal (C : ℝ) by simp, ← ENNReal.ofReal_mul,
+      mul_div_cancel₀]
+    any_goals positivity
+    refine ENNReal.toReal_ne_zero.2 ⟨LT.lt.ne' (by simpa), ?_⟩
+    simp only [ne_eq, ENNReal.sub_eq_top_iff, ENNReal.inv_eq_top, not_and, Decidable.not_not]
+    intro
+    simp_all
+  · let (eq := D_def) D : ℝ≥0∞ := μ Set.univ ^ (1 / q.toReal - 1 / p.toReal)
+    have hD : D ≠ ⊤ := by
+      refine ENNReal.rpow_ne_top_of_nonneg ?_ (by simp)
+      by_cases hp' : p = ∞
+      · simp [hp']
+      simp only [one_div, sub_nonneg]
+      rw [inv_le_inv₀, ENNReal.toReal_le_toReal hq' hp']
+      · exact hp.le
+      · exact ENNReal.toReal_pos (zero_le.trans_lt hp |>.ne') hp'
+      · exact ENNReal.toReal_pos (zero_lt_one.trans_le hq |>.ne') hq'
+    lift D to ℝ≥0 using hD with E
+    refine ⟨E * C, fun t ↦ ?_⟩
+    grw [eLpNorm_le_eLpNorm_mul_rpow_measure_univ hp.le (hX1 t), hX2]
+    simp [D_def, mul_comm]
 
 variable {ι : Type*} [LinearOrder ι] [OrderBot ι] [Countable ι] [TopologicalSpace ι]
   [OrderTopology ι] [NormedAddCommGroup E] [NormedSpace ℝ E]

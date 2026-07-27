@@ -57,8 +57,8 @@ lemma IsSquareIntegrable.const [IsFiniteMeasure P] {c : E} :
 lemma IsSquareIntegrable.uniformIntegrable [IsFiniteMeasure P] [CompleteSpace E]
     (hX : IsSquareIntegrable X 𝓕 P) :
     UniformIntegrable X 1 P :=
-  uniformIntegrable_of_eLpNorm_le 2 (by simp) (⨆ t, eLpNorm (X t) 2 P)
-    hX.bounded.ne (le_iSup _)
+  uniformIntegrable_of_eLpNorm_le (fun t ↦ hX.martingale.stronglyMeasurable'.aestronglyMeasurable)
+    2 1 (by simp) le_rfl (⨆ t, eLpNorm (X t) 2 P) hX.bounded.ne (le_iSup _)
 
 /-- An a.e.-square integrable martingale is a process that is indistinguishable from a
 square integrable martingale, see `IsSquareIntegrable`. -/
@@ -911,7 +911,7 @@ lemma exists_subsequence_ae_tendsto_uniformly {M : ℕ → ι → Ω → E} {N :
       rw [← ENNReal.tsum_mul_left]
       gcongr
       grw [← ENNReal.rpow_rpow_inv (y := 2) (x := ∫⁻ ω, ⨆ t, ‖M (φ n) t ω - N t ω‖ₑ ∂P) (by simp),
-        ENNReal.rpow_lintegral_le' (aem_iSup n) (by simp), ENNReal.mul_rpow_of_nonneg, one_div]
+        ENNReal.rpow_lintegral_le (aem_iSup n) (by simp), ENNReal.mul_rpow_of_nonneg, one_div]
       · norm_num
       · simp
     _ ≤ (P Set.univ) ^ (1 / 2 : ℝ) * (2 * ∑' n, eLpNorm (𝓕.limitProcess (M (φ n)) P -

@@ -54,6 +54,13 @@ lemma Function.IsRightContinuous.div' [TopologicalSpace E] [Preorder ι] [Div E]
     IsRightContinuous (f / g) :=
   fun x ↦ (hf x).div' (hg x)
 
+@[to_fun]
+lemma Function.IsRightContinuous.div [Preorder ι] [GroupWithZero E] [TopologicalSpace E]
+    [ContinuousInv₀ E] [ContinuousMul E] {f g : ι → E}
+    (hf : IsRightContinuous f) (hg : IsRightContinuous g) (h : ∀ x, g x ≠ 0) :
+    IsRightContinuous (f / g) :=
+  fun x ↦ (hf x).div (hg x) (h x)
+
 /-- A function is cadlag if it is right-continuous and has left limits. -/
 structure IsCadlag [TopologicalSpace E] [Preorder ι] (f : ι → E) : Prop where
   right_continuous : IsRightContinuous f
