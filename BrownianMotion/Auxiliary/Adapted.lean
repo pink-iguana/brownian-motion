@@ -70,11 +70,11 @@ lemma StronglyAdapted.isStronglyProgressive_of_rightContinuous {𝓕 : Filtratio
   let ip := {x : Iic t | 𝓝[>] x = ⊥}
   have tmemip : ⟨t, le_rfl⟩ ∈ ip := by
     simp only [← not_neBot, nhdsWithin_neBot, not_forall,
-      not_nonempty_iff_eq_empty, mem_setOf_eq, ip]
+      not_nonempty_iff_eq_empty, mem_ofPred_eq, ip]
     use univ
     simp
     rfl
-  have ipc : ip.Countable := countable_setOf_isolated_right (α := Iic t)
+  have ipc : ip.Countable := countable_setOfPred_isolated_right (α := Iic t)
   -- d is the set of points dense in (-∞,t]
   obtain ⟨d, dc, dd⟩ := TopologicalSpace.exists_countable_dense (Iic t)
   let s := ip ∪ d
@@ -92,7 +92,7 @@ lemma StronglyAdapted.isStronglyProgressive_of_rightContinuous {𝓕 : Filtratio
   have hav (a : Iic t × Ω) (n : ℕ) : a.1 ≤ v n ⟨(r n).card - 1, Nat.sub_one_lt (by simp [r])⟩ := by
     have l : v n ⟨(r n).card - 1, Nat.sub_one_lt (by simp [r])⟩ = ⟨t, le_rfl⟩ := by
       simp only [Finset.orderEmbOfFin_last (rfl : (r n).card = (r n).card) (by simp [r]),
-        Finset.max'_eq_iff, Subtype.forall, mem_Iic, Subtype.mk_le_mk, v, r,
+        Finset.max'_eq_iff, Subtype.forall, mem_Iic, v, r,
         Finset.mem_image, Finset.mem_range, comp_apply]
       exact ⟨⟨k, by linarith, by simp [hk]⟩, fun a ha _ => ha⟩
     simp only [l, ge_iff_le]
@@ -202,7 +202,7 @@ lemma StronglyAdapted.isStronglyProgressive_of_rightContinuous {𝓕 : Filtratio
             by_contra!
             have : a.1 ∈ ip := by
               have inter : Ioo a.1 ep = Ioi a.1 ∩ Iio ep := by grind
-              simp only [← empty_mem_iff_bot, ← this, mem_setOf_eq, ip, inter]
+              simp only [← empty_mem_iff_bot, ← this, mem_ofPred_eq, ip, inter]
               apply inter_mem_nhdsWithin (Ioi a.1) (IsOpen.mem_nhds isOpen_Iio (by simp [hep.1]))
             exact has (Or.inl this)
           obtain ⟨e, he⟩ : ((Ioo a.1 ep) ∩ d).Nonempty := Dense.inter_open_nonempty dd (Ioo a.1 ep)
@@ -257,7 +257,7 @@ lemma AEStronglyAdapted.const {c : E} : AEStronglyAdapted (fun _ _ ↦ c) 𝓕 P
   (stronglyAdapted_const 𝓕 c).aestronglyAdapted
 
 /-- Given a `hX : AEStronglyAdapted` process `X`, `hX.mk X` is a strongly adapted process
-that is indistinguishable from `X`.  -/
+that is indistinguishable from `X`. -/
 noncomputable def AEStronglyAdapted.mk (X : ι → Ω → E) (hX : AEStronglyAdapted X 𝓕 P) :
     ι → Ω → E := hX.choose
 
