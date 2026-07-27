@@ -5,9 +5,7 @@ public import Mathlib.Analysis.Convex.Integral
 
 @[expose] public section
 
-open MeasureTheory
-
-namespace ENNReal
+open MeasureTheory ENNReal
 
 lemma rpow_lintegral_le {X : Type*} {mX : MeasurableSpace X} {μ : Measure X} {f : X → ℝ≥0∞}
     (hf : AEMeasurable f μ) {r : ℝ} (hr : 1 ≤ r) :
@@ -20,6 +18,8 @@ lemma rpow_lintegral_le {X : Type*} {mX : MeasurableSpace X} {μ : Measure X} {f
       rpow_inv_rpow (by linarith)]
     field_simp
     simp
+
+namespace ENNReal
 
 theorem lintegral_Lp_finsum_le {α : Type*} [MeasurableSpace α] {μ : Measure α} {p : ℝ}
     {ι : Type*} {f : ι → α → ENNReal} {I : Finset ι}

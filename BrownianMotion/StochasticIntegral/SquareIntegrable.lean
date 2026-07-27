@@ -84,8 +84,7 @@ lemma IsAESquareIntegrable.aestronglyMeasurable_stoppedValue'
   ⟨𝓕.stoppedValue' hX.choose τ P, hX.choose_spec.1.stronglyMeasurable_stoppedValue' hτ,
     𝓕.stoppedValue'_congr hX.choose_spec.2⟩
 
-lemma IsAESquareIntegrable.uniformIntegrable [IsFiniteMeasure P] [CompleteSpace E]
-    (hX : IsAESquareIntegrable X 𝓕 P) :
+lemma IsAESquareIntegrable.uniformIntegrable [IsFiniteMeasure P] (hX : IsAESquareIntegrable X 𝓕 P) :
     UniformIntegrable X 1 P :=
   hX.choose_spec.1.uniformIntegrable.ae_eq (fun t ↦ (hX.choose_spec.2.ae_eq_eval t).symm)
 
@@ -295,13 +294,31 @@ lemma IsSquareIntegrable.ae_tendsto_limitProcess [IsFiniteMeasure P]
     ∀ᵐ ω ∂P, Tendsto (X · ω) atTop (𝓝 (𝓕.limitProcess X P ω)) :=
   hX.uniformIntegrable.ae_tendsto_limitProcess hX.martingale
 
-lemma IsAESquareIntegrable.ae_tendsto_limitProcess [Nonempty ι] [IsFiniteMeasure P]
+lemma IsAESquareIntegrable.ae_tendsto_limitProcess [IsFiniteMeasure P]
     (hX : IsAESquareIntegrable X 𝓕 P) :
     ∀ᵐ ω ∂P, Tendsto (X · ω) atTop (𝓝 (𝓕.limitProcess X P ω)) := by
   filter_upwards [hX.choose_spec.2, hX.choose_spec.1.ae_tendsto_limitProcess,
     𝓕.limitProcess_congr hX.choose_spec.2] with ω h1 h2 h3
   rw [h3]
   exact h2.congr (fun t ↦ (h1 t).symm)
+
+@[to_fun limitProcess_fun_add]
+lemma IsAESquareIntegrable.limitProcess_add [Nonempty ι] [IsFiniteMeasure P]
+    (hX : IsAESquareIntegrable X 𝓕 P) (hY : IsAESquareIntegrable Y 𝓕 P) :
+    𝓕.limitProcess (X + Y) P =ᵐ[P] 𝓕.limitProcess X P + 𝓕.limitProcess Y P := by
+  apply 𝓕.limitProcess_ae_eq
+    (𝓕.stronglyMeasurable_limitProcess.add 𝓕.stronglyMeasurable_limitProcess)
+  filter_upwards [hX.ae_tendsto_limitProcess, hY.ae_tendsto_limitProcess] with ω h1 h2 using
+    h1.add h2
+
+@[to_fun limitProcess_fun_sub]
+lemma IsAESquareIntegrable.limitProcess_sub [Nonempty ι] [IsFiniteMeasure P]
+    (hX : IsAESquareIntegrable X 𝓕 P) (hY : IsAESquareIntegrable Y 𝓕 P) :
+    𝓕.limitProcess (X - Y) P =ᵐ[P] 𝓕.limitProcess X P - 𝓕.limitProcess Y P := by
+  apply 𝓕.limitProcess_ae_eq
+    (𝓕.stronglyMeasurable_limitProcess.sub 𝓕.stronglyMeasurable_limitProcess)
+  filter_upwards [hX.ae_tendsto_limitProcess, hY.ae_tendsto_limitProcess] with ω h1 h2 using
+    h1.sub h2
 
 variable (𝓕) in
 lemma tendsto_ae_condExp' (X : Ω → E) :
@@ -356,7 +373,7 @@ lemma iSup_eLpNorm_le_eLpNorm_limitProcess (hX1 : Martingale X 𝓕 P)
   rw [eLpNorm_congr_ae (hX1.condExp_limitProcess_ae_eq hX3 hX2 t).symm]
   exact eLpNorm_condExp_le_eLpNorm _ (by simp)
 
-lemma isSquareIntegrable_of_limitProcess [CompleteSpace E] [IsFiniteMeasure P]
+lemma isSquareIntegrable_of_limitProcess [CompleteSpace E]
     (hX1 : Martingale X 𝓕 P) (hX2 : ∀ ω, IsCadlag (X · ω))
     (hX3 : UniformIntegrable X 1 P) (hX4 : MemLp (𝓕.limitProcess X P) 2 P) :
     IsSquareIntegrable X 𝓕 P where
@@ -687,24 +704,6 @@ lemma SquareIntegrable.coe_zero :
 
 variable [Nonempty ι]
 
-@[to_fun limitProcess_fun_add]
-lemma IsAESquareIntegrable.limitProcess_add
-    (hX : IsAESquareIntegrable X 𝓕 P) (hY : IsAESquareIntegrable Y 𝓕 P) :
-    𝓕.limitProcess (X + Y) P =ᵐ[P] 𝓕.limitProcess X P + 𝓕.limitProcess Y P := by
-  apply 𝓕.limitProcess_ae_eq
-    (𝓕.stronglyMeasurable_limitProcess.add 𝓕.stronglyMeasurable_limitProcess)
-  filter_upwards [hX.ae_tendsto_limitProcess, hY.ae_tendsto_limitProcess] with ω h1 h2 using
-    h1.add h2
-
-@[to_fun limitProcess_fun_sub]
-lemma IsAESquareIntegrable.limitProcess_sub
-    (hX : IsAESquareIntegrable X 𝓕 P) (hY : IsAESquareIntegrable Y 𝓕 P) :
-    𝓕.limitProcess (X - Y) P =ᵐ[P] 𝓕.limitProcess X P - 𝓕.limitProcess Y P := by
-  apply 𝓕.limitProcess_ae_eq
-    (𝓕.stronglyMeasurable_limitProcess.sub 𝓕.stronglyMeasurable_limitProcess)
-  filter_upwards [hX.ae_tendsto_limitProcess, hY.ae_tendsto_limitProcess] with ω h1 h2 using
-    h1.sub h2
-
 open TopologicalSpace in
 /-- Two modifications that are right-continuous are indistinguishable. -/
 lemma indistinguishable_of_modification' {T Ω E : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
@@ -997,7 +996,7 @@ lemma exists_subsequence_ae_tendsto_uniformly {M : ℕ → ι → Ω → E} {N :
       rw [← ENNReal.tsum_mul_left]
       gcongr
       grw [← ENNReal.rpow_rpow_inv (y := 2) (x := ∫⁻ ω, ⨆ t, ‖M (φ n) t ω - N t ω‖ₑ ∂P) (by simp),
-        ENNReal.rpow_lintegral_le (aem_iSup n) (by simp), ENNReal.mul_rpow_of_nonneg, one_div]
+        rpow_lintegral_le (aem_iSup n) (by simp), ENNReal.mul_rpow_of_nonneg, one_div]
       · norm_num
       · simp
     _ ≤ (P Set.univ) ^ (1 / 2 : ℝ) * (2 * ∑' n, eLpNorm (𝓕.limitProcess (M (φ n)) P -
@@ -1340,7 +1339,7 @@ lemma _root_.MeasureTheory.Martingale.isLocallySquareIntegrable_of_jump_le
     exact h_jump _ _
 
 lemma _root_.MeasureTheory.Martingale.isLocallySquareIntegrable_of_continuous
-    [PolishSpace ι] [CompleteSpace E] [SecondCountableTopology E] [DenselyOrdered ι]
+    [PolishSpace ι] [CompleteSpace E] [DenselyOrdered ι]
     (hX : Martingale X 𝓕 P) (h_cont : ∀ ω, Continuous (X · ω)) :
     IsLocallySquareIntegrable X 𝓕 P := by
   refine hX.isLocallySquareIntegrable_of_jump_le (fun ω ↦ (h_cont ω).isCadlag) (fun t ω ↦ ?_)
