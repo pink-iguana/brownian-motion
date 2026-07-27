@@ -40,7 +40,7 @@ lemma IsRightContinuous.continuous_comp {F : Type*} [TopologicalSpace E]
 @[simp]
 lemma isRightContinuous_const [TopologicalSpace E] [Preorder ι] (c : E) :
     IsRightContinuous (fun _ ↦ c : ι → E) :=
-  fun _ ↦ continuousWithinAt_const
+  continuous_const.isRightContinuous
 
 @[to_additive (attr := to_fun)]
 lemma Function.IsRightContinuous.mul [TopologicalSpace E] [Preorder ι] [Mul E] [ContinuousMul E]
@@ -69,15 +69,11 @@ structure IsCadlag [TopologicalSpace E] [Preorder ι] (f : ι → E) : Prop wher
 lemma Continuous.isCadlag [TopologicalSpace E] [Preorder ι] {f : ι → E} (hf : Continuous f) :
     IsCadlag f where
   right_continuous := hf.isRightContinuous
-  left_limit x := ⟨f x, hf.tendsto x |>.mono_left nhdsWithin_le_nhds⟩
+  left_limit x := ⟨f x, hf.continuousAt.continuousWithinAt⟩
 
 @[simp]
 lemma isCadlag_const [TopologicalSpace E] [Preorder ι] (c : E) : IsCadlag (fun _ ↦ c : ι → E) :=
-  ⟨isRightContinuous_const c, fun _ ↦ ⟨c, tendsto_const_nhds⟩⟩
-
-lemma Continuous.isCadlag [TopologicalSpace E] [Preorder ι] {f : ι → E} (hf : Continuous f) :
-    IsCadlag f :=
-  ⟨fun _ ↦ hf.continuousWithinAt, fun x ↦ ⟨f x, hf.continuousAt.continuousWithinAt⟩⟩
+  continuous_const.isCadlag
 
 section Jump
 
