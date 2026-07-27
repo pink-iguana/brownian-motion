@@ -89,7 +89,7 @@ theorem isSeparable_iUnion_range_of_stronglyMeasurable_of_isRightContinuous
     IsSeparable (⋃ t, Set.range (X t)) := by
   obtain ⟨d, hd_count, hd_dense⟩ := exists_countable_dense ι
   let D : Set ι := d ∪ {x : ι | 𝓝[>] x = ⊥}
-  have hD_count : D.Countable := hd_count.union countable_setOf_isolated_right
+  have hD_count : D.Countable := hd_count.union countable_setOfPred_isolated_right
   have hD_ne i (hi : i ∉ D) : (𝓝[>] i).NeBot := ⟨fun h ↦ hi (Set.mem_union_right _ h)⟩
   obtain ⟨c, hc_count, hc⟩ : IsSeparable (⋃ t : D, Set.range (X t)) := by
     have : Countable D := hD_count.to_subtype

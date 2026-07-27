@@ -43,19 +43,19 @@ lemma isRightContinuous_const [TopologicalSpace E] [Preorder ι] (c : E) :
   continuous_const.isRightContinuous
 
 @[to_additive (attr := to_fun)]
-lemma Function.IsRightContinuous.mul [TopologicalSpace E] [Preorder ι] [Mul E] [ContinuousMul E]
+lemma IsRightContinuous.mul [TopologicalSpace E] [Preorder ι] [Mul E] [ContinuousMul E]
     {f g : ι → E} (hf : IsRightContinuous f) (hg : IsRightContinuous g) :
     IsRightContinuous (f * g) :=
   fun x ↦ (hf x).mul (hg x)
 
 @[to_additive (attr := to_fun) sub]
-lemma Function.IsRightContinuous.div' [TopologicalSpace E] [Preorder ι] [Div E] [ContinuousDiv E]
+lemma IsRightContinuous.div' [TopologicalSpace E] [Preorder ι] [Div E] [ContinuousDiv E]
     {f g : ι → E} (hf : IsRightContinuous f) (hg : IsRightContinuous g) :
     IsRightContinuous (f / g) :=
   fun x ↦ (hf x).div' (hg x)
 
 @[to_fun]
-lemma Function.IsRightContinuous.div [Preorder ι] [GroupWithZero E] [TopologicalSpace E]
+lemma IsRightContinuous.div [Preorder ι] [GroupWithZero E] [TopologicalSpace E]
     [ContinuousInv₀ E] [ContinuousMul E] {f g : ι → E}
     (hf : IsRightContinuous f) (hg : IsRightContinuous g) (h : ∀ x, g x ≠ 0) :
     IsRightContinuous (f / g) :=
