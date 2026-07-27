@@ -58,8 +58,7 @@ lemma IsSquareIntegrable.const [IsFiniteMeasure P] {c : E} :
     rw [iSup_const, eLpNorm_const c (by simp) hP]
     finiteness
 
-lemma IsSquareIntegrable.uniformIntegrable [IsFiniteMeasure P] [CompleteSpace E]
-    (hX : IsSquareIntegrable X 𝓕 P) :
+lemma IsSquareIntegrable.uniformIntegrable [IsFiniteMeasure P] (hX : IsSquareIntegrable X 𝓕 P) :
     UniformIntegrable X 1 P :=
   uniformIntegrable_of_eLpNorm_le (fun t ↦ hX.martingale.stronglyMeasurable'.aestronglyMeasurable)
     2 1 (by simp) le_rfl (⨆ t, eLpNorm (X t) 2 P) hX.bounded.ne (le_iSup _)
@@ -71,7 +70,7 @@ def IsAESquareIntegrable (X : ι → Ω → E) (𝓕 : Filtration ι mΩ) (P : M
 
 lemma IsSquareIntegrable.stronglyMeasurable_stoppedValue' [Nonempty ι]
     [OrderTopology ι] [OrderBot ι] [SecondCountableTopology ι]
-    (hX : IsSquareIntegrable X 𝓕 P) {τ : Ω → WithTop ι} (hτ : IsStoppingTime 𝓕 τ) :
+    (hX : IsSquareIntegrable X 𝓕 P) (hτ : IsStoppingTime 𝓕 τ) :
     StronglyMeasurable[hτ.measurableSpace] (𝓕.stoppedValue' X τ P) := by
   borelize ι
   exact 𝓕.stronglyMeasurable_stoppedValue'
@@ -80,7 +79,7 @@ lemma IsSquareIntegrable.stronglyMeasurable_stoppedValue' [Nonempty ι]
 
 lemma IsAESquareIntegrable.aestronglyMeasurable_stoppedValue' [MeasurableSpace ι] [Nonempty ι]
     [OrderTopology ι] [OrderBot ι] [SecondCountableTopology ι] [BorelSpace ι]
-    (hX : IsAESquareIntegrable X 𝓕 P) {τ : Ω → WithTop ι} (hτ : IsStoppingTime 𝓕 τ) :
+    (hX : IsAESquareIntegrable X 𝓕 P) (hτ : IsStoppingTime 𝓕 τ) :
     AEStronglyMeasurable[hτ.measurableSpace] (𝓕.stoppedValue' X τ P) P :=
   ⟨𝓕.stoppedValue' hX.choose τ P, hX.choose_spec.1.stronglyMeasurable_stoppedValue' hτ,
     𝓕.stoppedValue'_congr hX.choose_spec.2⟩
@@ -315,14 +314,35 @@ lemma _root_.MeasureTheory.Martingale.condExp_limitProcess_ae_eq
     P[𝓕.limitProcess X P | 𝓕 t] =ᵐ[P] X t := by
   sorry
 
-lemma IsSquareIntegrable.condExp_limitProcess_ae_eq (hX : IsSquareIntegrable X 𝓕 P) (t : ι) :
-    P[𝓕.limitProcess X P | 𝓕 t] =ᵐ[P] X t := by
-  sorry
-
-lemma IsAESquareIntegrable.condExp_limitProcess_ae_eq' [CompleteSpace E] [Nonempty ι]
-    (hX : IsAESquareIntegrable X 𝓕 P) {τ : Ω → WithTop ι} (hτ : IsStoppingTime 𝓕 τ) :
+lemma _root_.MeasureTheory.Martingale.condExp_limitProcess_ae_eq'
+    (hX1 : Martingale X 𝓕 P) (hX2 : UniformIntegrable X 1 P)
+    (hX3 : ∀ ω, IsCadlag (X · ω)) (hτ : IsStoppingTime 𝓕 τ) :
     P[𝓕.limitProcess X P | hτ.measurableSpace] =ᵐ[P] 𝓕.stoppedValue' X τ P := by
   sorry
+
+lemma IsSquareIntegrable.condExp_limitProcess_ae_eq [IsFiniteMeasure P]
+    (hX : IsSquareIntegrable X 𝓕 P) (t : ι) :
+    P[𝓕.limitProcess X P | 𝓕 t] =ᵐ[P] X t :=
+  hX.martingale.condExp_limitProcess_ae_eq hX.uniformIntegrable hX.cadlag t
+
+lemma IsSquareIntegrable.condExp_limitProcess_ae_eq' [IsFiniteMeasure P]
+    (hX : IsSquareIntegrable X 𝓕 P) (hτ : IsStoppingTime 𝓕 τ) :
+    P[𝓕.limitProcess X P | hτ.measurableSpace] =ᵐ[P] 𝓕.stoppedValue' X τ P :=
+  hX.martingale.condExp_limitProcess_ae_eq' hX.uniformIntegrable hX.cadlag hτ
+
+attribute [gcongr] condExp_congr_ae
+
+lemma IsAESquareIntegrable.condExp_limitProcess_ae_eq [IsFiniteMeasure P] [CompleteSpace E]
+    (hX : IsAESquareIntegrable X 𝓕 P) (t : ι) :
+    P[𝓕.limitProcess X P | 𝓕 t] =ᵐ[P] X t := by
+  grw [𝓕.limitProcess_congr hX.choose_spec.2, hX.choose_spec.1.condExp_limitProcess_ae_eq,
+    hX.choose_spec.2.ae_eq_eval]
+
+lemma IsAESquareIntegrable.condExp_limitProcess_ae_eq' [IsFiniteMeasure P] [CompleteSpace E]
+    (hX : IsAESquareIntegrable X 𝓕 P) (hτ : IsStoppingTime 𝓕 τ) :
+    P[𝓕.limitProcess X P | hτ.measurableSpace] =ᵐ[P] 𝓕.stoppedValue' X τ P := by
+  grw [𝓕.limitProcess_congr hX.choose_spec.2, hX.choose_spec.1.condExp_limitProcess_ae_eq',
+    hX.choose_spec.2]
 
 lemma IsSquareIntegrable.tendsto_eLpNorm_two_limitProcess (hX : IsSquareIntegrable X 𝓕 P) :
     Tendsto (fun i ↦ eLpNorm (X i - 𝓕.limitProcess X P) 2 P) atTop (𝓝 0) := by
@@ -415,8 +435,8 @@ lemma limitProcess_stoppedProcess (hX1 : Martingale X 𝓕 P) (hX2 : UniformInte
   borelize ι E
   apply 𝓕.limitProcess_ae_eq
   · exact 𝓕.stronglyMeasurable_stoppedValue'
-      (hX1.stronglyAdapted.isStronglyProgressive_of_rightContinuous hX3) hX3 hτ |>.mono sorry
-      -- #42021
+      (hX1.stronglyAdapted.isStronglyProgressive_of_rightContinuous hX3) hX3 hτ |>.mono
+      hτ.measurableSpace_le'
   filter_upwards [hX2.ae_tendsto_limitProcess hX1] with ω h
   cases h1 : τ ω with
   | top => simpa [h1]
@@ -424,7 +444,7 @@ lemma limitProcess_stoppedProcess (hX1 : Martingale X 𝓕 P) (hX2 : UniformInte
     simp only [h1, WithTop.coe_inj, stoppedProcess_of_eq_coe, Filtration.stoppedValue'_of_eq_coe]
     exact tendsto_const_nhds.congr' (eventually_atTop.2 ⟨t, fun s hs ↦ by simp [hs]⟩)
 
-variable [IsFiniteMeasure P] [CompleteSpace E]
+variable [IsFiniteMeasure P]
 
 lemma IsSquareIntegrable.limitProcess_stoppedProcess
     (hX : IsSquareIntegrable X 𝓕 P) (hτ : IsStoppingTime 𝓕 τ) :
@@ -437,6 +457,8 @@ lemma IsAESquareIntegrable.limitProcess_stoppedProcess
     𝓕.limitProcess (stoppedProcess X τ) P =ᵐ[P] 𝓕.stoppedValue' X τ P := by
   grw [𝓕.limitProcess_congr (stoppedProcess_congr hX.choose_spec.2),
     hX.choose_spec.1.limitProcess_stoppedProcess hτ, 𝓕.stoppedValue'_congr hX.choose_spec.2]
+
+variable [CompleteSpace E]
 
 protected lemma IsSquareIntegrable.stoppedProcess
     [Approximable 𝓕 P] (hX : IsSquareIntegrable X 𝓕 P) (hτ : IsStoppingTime 𝓕 τ) :
@@ -542,21 +564,27 @@ instance : AddCommGroup (SquareIntegrable E P 𝓕) :=
 instance : Module ℝ (SquareIntegrable E P 𝓕) :=
   Submodule.module (squareIntegrableSubmodule E P 𝓕)
 
+private
 lemma SquareIntegrable.val_add (X Y : SquareIntegrable E P 𝓕) : (X + Y).1 = X.1 + Y.1 :=
   Submodule.coe_add X Y
 
+private
 lemma SquareIntegrable.val_sub (X Y : SquareIntegrable E P 𝓕) : (X - Y).1 = X.1 - Y.1 :=
   Submodule.coe_sub _ X Y
 
+private
 lemma SquareIntegrable.val_smul (X : SquareIntegrable E P 𝓕) (c : ℝ) : (c • X).1 = c • X.1 :=
   Submodule.coe_smul c X
 
+private
 lemma SquareIntegrable.val_neg (X : SquareIntegrable E P 𝓕) : (-X).1 = -X.1 :=
   Submodule.coe_neg _ X
 
+private
 lemma SquareIntegrable.val_zero : (0 : SquareIntegrable E P 𝓕).1 = 0 :=
   Submodule.coe_zero
 
+private
 lemma SquareIntegrable.val_inj (X Y : SquareIntegrable E P 𝓕) : X = Y ↔ X.1 = Y.1 :=
   Subtype.ext_iff
 
@@ -998,13 +1026,6 @@ lemma exists_subsequence_ae_tendsto_uniformly {M : ℕ → ι → Ω → E} {N :
     · simpa
     · positivity
 
-/- Is in mathlib but not available here for some reason. -/
-@[to_additive]
-theorem tendsto_iff_enorm_div_tendsto_zero {α E : Type*} [SeminormedCommGroup E] {f : α → E}
-    {a : Filter α} {b : E} :
-    Tendsto f a (𝓝 b) ↔ Tendsto (fun e => ‖f e / b‖ₑ) a (𝓝 0) := by
-  simp only [← edist_eq_enorm_div, ← tendsto_iff_edist_tendsto_0]
-
 /-- The submodule of continuous square integrable martingales is closed in the Hilbert space
 of square integrable martingales. -/
 instance [𝓕.IsComplete P] [Nonempty ι] [OrderTopology ι] [SecondCountableTopology ι] :
@@ -1192,8 +1213,7 @@ lemma IsPurelyDiscontinuous.stoppedProcess [OrderBot ι] [Approximable 𝓕 P]
 
 /-- The continuous part of the stopped process is the stopped process of the continuous part. -/
 lemma continuousPart_stoppedProcess [OrderBot ι] [Approximable 𝓕 P]
-    {X : ι → Ω → E} (hX : IsAESquareIntegrable X 𝓕 P) {τ : Ω → WithTop ι}
-    (hτ : IsStoppingTime 𝓕 τ) :
+    {X : ι → Ω → E} (hX : IsAESquareIntegrable X 𝓕 P) (hτ : IsStoppingTime 𝓕 τ) :
     continuousPart (stoppedProcess X τ) 𝓕 P ≡ᵐ[P] stoppedProcess (continuousPart X 𝓕 P) τ := by
   have : stoppedProcess X τ =
       stoppedProcess (continuousPart X 𝓕 P) τ + stoppedProcess (discontinuousPart X 𝓕 P) τ := by
@@ -1211,8 +1231,7 @@ attribute [to_fun] stoppedProcess_sub
 /-- The discontinuous part of the stopped process is
 the stopped process of the discontinuous part. -/
 lemma discontinuousPart_stoppedProcess [OrderBot ι] [Approximable 𝓕 P]
-    {X : ι → Ω → E} (hX : IsAESquareIntegrable X 𝓕 P) {τ : Ω → WithTop ι}
-    (hτ : IsStoppingTime 𝓕 τ) :
+    {X : ι → Ω → E} (hX : IsAESquareIntegrable X 𝓕 P) (hτ : IsStoppingTime 𝓕 τ) :
     discontinuousPart (stoppedProcess X τ) 𝓕 P ≡ᵐ[P]
       stoppedProcess (discontinuousPart X 𝓕 P) τ := by
   have : stoppedProcess X τ =

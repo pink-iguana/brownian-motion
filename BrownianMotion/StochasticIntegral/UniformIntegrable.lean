@@ -290,7 +290,7 @@ lemma UniformIntegrable.condExp {X : ι → Ω → E} [NormedAddCommGroup E] [No
 /-- If a a family of random variables in bounded in `Lp` for `p > q ≥ 1`, then it is uniformly
 integrable in `Lq`. -/
 lemma uniformIntegrable_of_eLpNorm_le {X : ι → Ω → E} [NormedAddCommGroup E] [NormedSpace ℝ E]
-    [CompleteSpace E] [IsFiniteMeasure μ] (hX1 : ∀ i, AEStronglyMeasurable (X i) μ)
+    [IsFiniteMeasure μ] (hX1 : ∀ i, AEStronglyMeasurable (X i) μ)
     (p q : ℝ≥0∞) (hp : q < p) (hq : 1 ≤ q) (C : ℝ≥0∞) (hC : C ≠ ∞)
     (hX2 : ∀ i, eLpNorm (X i) p μ ≤ C) :
     UniformIntegrable X q μ := by
@@ -298,14 +298,6 @@ lemma uniformIntegrable_of_eLpNorm_le {X : ι → Ω → E} [NormedAddCommGroup 
   have hq' : q ≠ ∞ := by
     contrapose hp
     simp [hp]
-  obtain rfl | hC := eq_or_ne C 0
-  · have (t : ι) : X t =ᵐ[μ] 0 := by
-      rw [← eLpNorm_eq_zero_iff (p := p) (hX1 t)]
-      · simpa using hX2 t
-      · exact zero_le.trans_lt hp |>.ne'
-    rw [uniformIntegrable_iff hq hq']
-    refine ⟨hX1, fun ε hε ↦ ⟨0, fun t ↦ ?_⟩⟩
-    simp [eLpNorm_congr_ae (this t)]
   refine ⟨hX1, fun ε hε ↦ ?_, ?_⟩
   · have {s : Set Ω} (hs : MeasurableSet s) (t : ι) :
         eLpNorm (s.indicator (X t)) q μ ≤
@@ -328,10 +320,11 @@ lemma uniformIntegrable_of_eLpNorm_le {X : ι → Ω → E} [NormedAddCommGroup 
           intro
           simp_all
         · simpa [tsub_eq_zero_iff_le]
-    refine ⟨(ε / C) ^ (q⁻¹ - p⁻¹)⁻¹.toReal, by positivity, fun t s hs hμs ↦ ?_⟩
-    grw [this hs t, hμs, hX2, ENNReal.ofReal_rpow_of_nonneg, ENNReal.toReal_inv,
-      Real.rpow_inv_rpow, show (C : ℝ≥0∞) = .ofReal (C : ℝ) by simp, ← ENNReal.ofReal_mul,
-      mul_div_cancel₀]
+    refine ⟨(ε / (C + 1)) ^ (q⁻¹ - p⁻¹)⁻¹.toReal, by positivity, fun t s hs hμs ↦ ?_⟩
+    grw [this hs t, hμs, hX2, le_self_add (a := (C : ℝ≥0∞)) (b := 1), ENNReal.ofReal_rpow_of_nonneg,
+      ENNReal.toReal_inv,
+      Real.rpow_inv_rpow, show (C + 1 : ℝ≥0∞) = .ofReal (C + 1: ℝ) by simp [ENNReal.ofReal_add],
+      ← ENNReal.ofReal_mul, mul_div_cancel₀]
     any_goals positivity
     refine ENNReal.toReal_ne_zero.2 ⟨LT.lt.ne' (by simpa), ?_⟩
     simp only [ne_eq, ENNReal.sub_eq_top_iff, ENNReal.inv_eq_top, not_and, Decidable.not_not]
