@@ -68,7 +68,7 @@ square integrable martingale, see `IsSquareIntegrable`. -/
 def IsAESquareIntegrable (X : ι → Ω → E) (𝓕 : Filtration ι mΩ) (P : Measure Ω) : Prop :=
   ∃ Y : ι → Ω → E, IsSquareIntegrable Y 𝓕 P ∧ X ≡ᵐ[P] Y
 
-lemma IsSquareIntegrable.stronglyMeasurable_stoppedValue' [Nonempty ι]
+lemma IsSquareIntegrable.stronglyMeasurable_stoppedValue'
     [OrderTopology ι] [OrderBot ι] [SecondCountableTopology ι]
     (hX : IsSquareIntegrable X 𝓕 P) (hτ : IsStoppingTime 𝓕 τ) :
     StronglyMeasurable[hτ.measurableSpace] (𝓕.stoppedValue' X τ P) := by
@@ -77,8 +77,8 @@ lemma IsSquareIntegrable.stronglyMeasurable_stoppedValue' [Nonempty ι]
     (hX.martingale.stronglyAdapted.isStronglyProgressive_of_rightContinuous
       (fun ω ↦ (hX.cadlag ω).right_continuous)) (fun ω ↦ (hX.cadlag ω).right_continuous) hτ
 
-lemma IsAESquareIntegrable.aestronglyMeasurable_stoppedValue' [MeasurableSpace ι] [Nonempty ι]
-    [OrderTopology ι] [OrderBot ι] [SecondCountableTopology ι] [BorelSpace ι]
+lemma IsAESquareIntegrable.aestronglyMeasurable_stoppedValue'
+    [OrderTopology ι] [OrderBot ι] [SecondCountableTopology ι]
     (hX : IsAESquareIntegrable X 𝓕 P) (hτ : IsStoppingTime 𝓕 τ) :
     AEStronglyMeasurable[hτ.measurableSpace] (𝓕.stoppedValue' X τ P) P :=
   ⟨𝓕.stoppedValue' hX.choose τ P, hX.choose_spec.1.stronglyMeasurable_stoppedValue' hτ,
@@ -291,12 +291,12 @@ lemma _root_.MeasureTheory.UniformIntegrable.ae_tendsto_limitProcess
   sorry
 
 lemma IsSquareIntegrable.ae_tendsto_limitProcess [IsFiniteMeasure P]
-    (hX : IsSquareIntegrable X 𝓕 P) [CompleteSpace E] :
+    (hX : IsSquareIntegrable X 𝓕 P) :
     ∀ᵐ ω ∂P, Tendsto (X · ω) atTop (𝓝 (𝓕.limitProcess X P ω)) :=
   hX.uniformIntegrable.ae_tendsto_limitProcess hX.martingale
 
 lemma IsAESquareIntegrable.ae_tendsto_limitProcess [Nonempty ι] [IsFiniteMeasure P]
-    [CompleteSpace E] (hX : IsAESquareIntegrable X 𝓕 P) :
+    (hX : IsAESquareIntegrable X 𝓕 P) :
     ∀ᵐ ω ∂P, Tendsto (X · ω) atTop (𝓝 (𝓕.limitProcess X P ω)) := by
   filter_upwards [hX.choose_spec.2, hX.choose_spec.1.ae_tendsto_limitProcess,
     𝓕.limitProcess_congr hX.choose_spec.2] with ω h1 h2 h3
@@ -349,7 +349,7 @@ lemma IsSquareIntegrable.tendsto_eLpNorm_two_limitProcess (hX : IsSquareIntegrab
   sorry
 
 lemma iSup_eLpNorm_le_eLpNorm_limitProcess (hX1 : Martingale X 𝓕 P)
-    (hX2 : ∀ ω, IsCadlag (X · ω)) [IsFiniteMeasure P] [CompleteSpace E]
+    (hX2 : ∀ ω, IsCadlag (X · ω)) [CompleteSpace E]
     (hX3 : UniformIntegrable X 1 P) :
     ⨆ t, eLpNorm (X t) 2 P ≤ eLpNorm (𝓕.limitProcess X P) 2 P := by
   refine iSup_le fun t ↦ ?_
@@ -382,8 +382,7 @@ lemma IsSquareIntegrable.iSup_lintegral_pow_two_eq (hX : IsSquareIntegrable X �
   · rw [eLpNorm_eq_eLpNorm', eLpNorm']
     all_goals simp
 
-lemma IsAESquareIntegrable.iSup_eLpNorm_eq_eLpNorm_limitProcess [Nonempty ι]
-    (hX : IsAESquareIntegrable X 𝓕 P) :
+lemma IsAESquareIntegrable.iSup_eLpNorm_eq_eLpNorm_limitProcess (hX : IsAESquareIntegrable X 𝓕 P) :
     ⨆ i, eLpNorm (X i) 2 P = eLpNorm (𝓕.limitProcess X P) 2 P := by
   rw [eLpNorm_congr_ae (𝓕.limitProcess_congr hX.choose_spec.2),
     ← hX.choose_spec.1.iSup_eLpNorm_eq_eLpNorm_limitProcess]
@@ -1054,7 +1053,7 @@ open scoped Classical in
 /-- The continuous martingale part of a square-integrable martingale `X`. This is defined as the
 projection of `X` onto the closed subspace of continuous square-integrable martingales. -/
 noncomputable def continuousPart (X : ι → Ω → E) (𝓕 : Filtration ι mΩ) (P : Measure Ω)
-    [IsFiniteMeasure P] [SigmaFiniteFiltration P 𝓕] [𝓕.IsComplete P] : ι → Ω → E :=
+    [IsFiniteMeasure P] [𝓕.IsComplete P] : ι → Ω → E :=
   if hX : IsAESquareIntegrable X 𝓕 P
     then (continuousSquareIntegrable E P 𝓕).starProjection (SquareIntegrable.mk X hX)
     else 0
@@ -1303,7 +1302,7 @@ lemma isLocallySquareIntegrable_of_isEmpty [IsEmpty Ω]
   exact isSquareIntegrable_of_isEmpty _ _ _
 
 lemma _root_.MeasureTheory.Martingale.isLocallySquareIntegrable_of_jump_le
-    [PolishSpace ι] [CompleteSpace E] [SecondCountableTopology E]
+    [PolishSpace ι] [CompleteSpace E]
     (hX : Martingale X 𝓕 P) (h_cadlag : ∀ ω, IsCadlag (X · ω))
     {C : ℝ} (h_jump : ∀ t ω, ‖Δ (X · ω) t‖ ≤ C) :
     IsLocallySquareIntegrable X 𝓕 P := by

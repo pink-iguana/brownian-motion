@@ -9,8 +9,8 @@ open MeasureTheory
 
 namespace ENNReal
 
-lemma rpow_lintegral_le {X : Type*} {mX : MeasurableSpace X} {μ : Measure X}
-    [IsFiniteMeasure μ] {f : X → ℝ≥0∞} (hf : AEMeasurable f μ) {r : ℝ} (hr : 1 ≤ r) :
+lemma rpow_lintegral_le {X : Type*} {mX : MeasurableSpace X} {μ : Measure X} {f : X → ℝ≥0∞}
+    (hf : AEMeasurable f μ) {r : ℝ} (hr : 1 ≤ r) :
     (∫⁻ x, f x ∂μ) ^ r ≤ (μ Set.univ) ^ (r - 1) * ∫⁻ x, (f x) ^ r ∂μ := calc
   (∫⁻ x, f x ∂μ) ^ r
     = (eLpNorm' f 1 μ) ^ r := by simp [eLpNorm']
