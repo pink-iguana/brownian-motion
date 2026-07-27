@@ -101,7 +101,6 @@ theorem ae_bdd_condExp_of_ae_bdd' {R : ℝ} {f : Ω → E} (hbdd : ∀ᵐ ω ∂
     (integrable_const _) hbdd] with ω hω1 hω2
   grw [hω1, hω2, condExp_const hm]
 
-set_option backward.isDefEq.respectTransparency false in
 /-- Given an integrable function `g`, the conditional expectations of `g` with respect to
 a sequence of sub-σ-algebras is uniformly integrable. -/
 theorem Integrable.uniformIntegrable_condExp' {ι : Type*} {g : Ω → E}
@@ -121,8 +120,12 @@ theorem Integrable.uniformIntegrable_condExp' {ι : Type*} {g : Ω → E}
     filter_upwards [condExp_congr_ae (m := ℱ n) hne] with x hx
     simp only [zero_le, Set.ofPred_true, Set.indicator_univ, Pi.zero_apply, hx, condExp_zero]
   obtain ⟨δ, hδ, h⟩ := hg.eLpNorm_indicator_le le_rfl ENNReal.one_ne_top hε
-  set C : ℝ≥0 := ⟨δ, hδ.le⟩⁻¹ * (eLpNorm g 1 μ).toNNReal with hC
-  have hCpos : 0 < C := mul_pos (inv_pos.2 hδ) (ENNReal.toNNReal_pos hne hg.eLpNorm_lt_top.ne)
+  set C : ℝ≥0 := δ.toNNReal⁻¹ * (eLpNorm g 1 μ).toNNReal with hC
+  have hCpos : 0 < C := mul_pos (inv_pos.2 (Real.toNNReal_pos.2 hδ))
+    (ENNReal.toNNReal_pos hne hg.eLpNorm_lt_top.ne)
+  have hδC : ENNReal.ofReal δ * (C : ℝ≥0∞) = eLpNorm g 1 μ := by
+    rw [← Real.coe_toNNReal δ hδ.le, ← ENNReal.coe_nnreal_eq, ← ENNReal.coe_mul, hC,
+      mul_inv_cancel_left₀ (Real.toNNReal_pos.2 hδ).ne', ENNReal.coe_toNNReal hg.eLpNorm_lt_top.ne]
   have : ∀ n, μ {x : Ω | C ≤ ‖(μ[g|ℱ n]) x‖₊} ≤ ENNReal.ofReal δ := by
     intro n
     have : C ^ ENNReal.toReal 1 * μ {x | ENNReal.ofNNReal C ≤ ‖μ[g|ℱ n] x‖₊} ≤
@@ -138,14 +141,8 @@ theorem Integrable.uniformIntegrable_condExp' {ι : Type*} {g : Ω → E}
     simp_rw [ENNReal.coe_le_coe] at this
     refine this.trans ?_
     rw [ENNReal.div_le_iff_le_mul (Or.inl (ENNReal.coe_ne_zero.2 hCpos.ne'))
-        (Or.inl ENNReal.coe_lt_top.ne),
-      hC, Nonneg.inv_mk, ENNReal.coe_mul, ENNReal.coe_toNNReal hg.eLpNorm_lt_top.ne, ← mul_assoc,
-      ENNReal.coe_nnreal_eq, ← ENNReal.ofReal_mul hδ.le, rpow_one]
-    convert eLpNorm_condExp_le_eLpNorm _ le_rfl
-    · convert one_mul _
-      simp only [ofReal_eq_one]
-      exact mul_inv_cancel₀ hδ.ne'
-    · infer_instance
+        (Or.inl ENNReal.coe_lt_top.ne), hδC, rpow_one]
+    exact eLpNorm_condExp_le_eLpNorm _ le_rfl
   refine ⟨C, fun n => le_trans ?_ (h {x : Ω | C ≤ ‖(μ[g|ℱ n]) x‖₊} (hmeas n C) (this n))⟩
   have hmeasℱ : MeasurableSet[ℱ n] {x : Ω | C ≤ ‖(μ[g|ℱ n]) x‖₊} :=
     @StronglyMeasurable.measurableSet_le _ _ (ℱ n) _ _ _ _ _ _ stronglyMeasurable_const

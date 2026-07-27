@@ -90,7 +90,6 @@ lemma komlos_convex (R : Type*) [Semifield R] [LinearOrder R] [IsStrictOrderedRi
     (by positivity) (by norm_cast; grind : (n : ℝ) + 1 ≥ N + 1), inv_anti₀
       (by positivity) (by norm_cast; grind : (m : ℝ) + 1 ≥ N + 1)]
 
-set_option backward.isDefEq.respectTransparency false in
 lemma komlos_norm [NormedAddCommGroup E] [InnerProductSpace ℝ E] [CompleteSpace E]
     {f : ℕ → E} (h_bdd : ∃ M : ℝ, ∀ n, ‖f n‖ ≤ M) :
     ∃ (g : ℕ → E), (∀ n, g n ∈ convexHull ℝ (Set.range fun m ↦ f (n + m))) ∧

@@ -831,8 +831,8 @@ lemma aux'_Icc {ι : Type*} [Nonempty ι]
       refine ⟨fun i ↦ Set.univ ×ˢ B i, fun n ↦ ?_, rfl⟩
       exact ⟨Set.univ, .univ, B n, hB n, rfl⟩
 
-set_option backward.isDefEq.respectTransparency false in
-lemma borel_eq_generateFrom_isCompact : borel ℝ = MeasurableSpace.generateFrom IsCompact := by
+lemma borel_eq_generateFrom_isCompact :
+    borel ℝ = MeasurableSpace.generateFrom {s : Set ℝ | IsCompact s} := by
   refine le_antisymm ?_ ?_
   · rw [borel_eq_generateFrom_Icc]
     refine MeasurableSpace.generateFrom_mono fun s hs ↦ ?_

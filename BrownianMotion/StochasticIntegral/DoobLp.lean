@@ -90,7 +90,6 @@ lemma _root_.tendsto_inv_add_atTop_nhds_zero_nat {𝕜 : Type*} [DivisionSemirin
     Tendsto (fun n : ℕ ↦ ((n : 𝕜) + 1)⁻¹) atTop (𝓝 0) :=
   by simpa using tendsto_one_div_add_atTop_nhds_zero_nat (𝕜 := 𝕜)
 
-set_option backward.isDefEq.respectTransparency false in
 lemma maximal_ineq_countable_ennreal (hsub : Submartingale Y 𝓕 P) (hnonneg : 0 ≤ Y) (ε : ℝ≥0)
     (n : ι) :
     ε • P.real {ω | (ε : ℝ≥0∞) ≤ ⨆ i ≤ n, ENNReal.ofReal (Y i ω)} ≤
@@ -105,6 +104,7 @@ lemma maximal_ineq_countable_ennreal (hsub : Submartingale Y 𝓕 P) (hnonneg : 
   let J (k : ℕ) : Finset ι := insert n ((range k).image f |>.filter (· ≤ n))
   have hJn (k) : ∀ i ∈ J k, i ≤ n := by simp [J]
   have hnJ (k) : n ∈ J k := by simp [J]
+  have hJne (k) : (J k).Nonempty := Finset.insert_nonempty ..
   have hJmono {k l : ℕ} (hkl : k ≤ l) : J k ⊆ J l := by unfold J; gcongr
   have hmemJ (k) (h : f k ≤ n) : f k ∈ J (k + 1) := by
     simpa [J, h] using .inr ⟨k, by omega, rfl⟩
@@ -112,7 +112,7 @@ lemma maximal_ineq_countable_ennreal (hsub : Submartingale Y 𝓕 P) (hnonneg : 
   have hlt (ε' : ℝ≥0) (hε' : ε' < ε) :
     ε' • P.real {ω | (ε' : ℝ≥0∞) < supY ω} ≤ ∫ ω in {ω | (ε' : ℝ≥0∞) ≤ supY ω}, Y n ω ∂P := by
     have hbdd : BddAbove <| Set.range fun k ↦
-        ∫ ω in {ω | (ε' : ℝ) ≤ (J k).sup' ⟨n, hnJ k⟩ fun i ↦ Y i ω}, Y n ω ∂P := by
+        ∫ ω in {ω | (ε' : ℝ) ≤ (J k).sup' (hJne k) fun i ↦ Y i ω}, Y n ω ∂P := by
       use ∫ ω, Y n ω ∂P
       simpa [upperBounds] using fun k ↦
         setIntegral_le_integral (hsub.integrable n) (.of_forall (hnonneg n))
@@ -123,7 +123,7 @@ lemma maximal_ineq_countable_ennreal (hsub : Submartingale Y 𝓕 P) (hnonneg : 
         simp_rw [supY, lt_iSup_iff]
         lift Y to ι → Ω → ℝ≥0 using hnonneg
         simp
-      _ = ε' • P.real (⋃ k, {ω | (ε' : ℝ) < (J k).sup' ⟨n, hnJ k⟩ fun i ↦ Y i ω}) := by
+      _ = ε' • P.real (⋃ k, {ω | (ε' : ℝ) < (J k).sup' (hJne k) fun i ↦ Y i ω}) := by
         congr!
         ext ω
         simp only [Set.mem_iUnion, Set.mem_ofPred_eq, exists_prop, lt_sup'_iff]
@@ -133,14 +133,14 @@ lemma maximal_ineq_countable_ennreal (hsub : Submartingale Y 𝓕 P) (hnonneg : 
           use k + 1, f k, hmemJ k hi
         · rintro ⟨k, i, hi, h⟩
           use i, by simp [hJn k i hi]
-      _ = ⨆ k, ε' • P.real {ω | (ε' : ℝ) < (J k).sup' ⟨n, hnJ k⟩ fun i ↦ Y i ω} := by
+      _ = ⨆ k, ε' • P.real {ω | (ε' : ℝ) < (J k).sup' (hJne k) fun i ↦ Y i ω} := by
         rw [Measure.real, Monotone.measure_iUnion, ENNReal.toReal_iSup]
         · apply Real.mul_iSup_of_nonneg
           simp
         · finiteness
         intro k l hkl
         simpa using fun ω i hi h ↦ ⟨i, hJmono hkl hi, h⟩
-      _ ≤ ⨆ k, ε' • P.real {ω | (ε' : ℝ) ≤ (J k).sup' ⟨n, hnJ k⟩ fun i ↦ Y i ω} := by
+      _ ≤ ⨆ k, ε' • P.real {ω | (ε' : ℝ) ≤ (J k).sup' (hJne k) fun i ↦ Y i ω} := by
         gcongr
         · use ε' • P.real Set.univ
           simp only [upperBounds, le_sup'_iff, Set.mem_range, forall_exists_index,
@@ -151,7 +151,7 @@ lemma maximal_ineq_countable_ennreal (hsub : Submartingale Y 𝓕 P) (hnonneg : 
           simp
         · finiteness -- gcongr bug?
         · exact fun h ↦ h.le
-      _ ≤ ⨆ k, ∫ ω in {ω | (ε' : ℝ) ≤ (J k).sup' ⟨n, hnJ k⟩ fun i ↦ Y i ω}, Y n ω ∂P := by
+      _ ≤ ⨆ k, ∫ ω in {ω | (ε' : ℝ) ≤ (J k).sup' (hJne k) fun i ↦ Y i ω}, Y n ω ∂P := by
         gcongr with k
         exact maximal_ineq_finset hsub hnonneg ε' (hJn k) (hnJ k)
       _ ≤ ∫ ω in {ω | (ε' : ℝ≥0∞) ≤ supY ω}, Y n ω ∂P := by
@@ -365,7 +365,6 @@ theorem measurable_iSup_of_rightContinuous {β : Type*} {f : ι → Ω → β}
     obtain ⟨k, hk⟩ := hS.exists_mem_open isOpen_Ioo this
     exact Set.mem_biUnion hk.1 (hu.2 hk.2)
 
-set_option backward.isDefEq.respectTransparency false in
 theorem maximal_ineq_ennreal (hsub : Submartingale Y 𝓕 P) (hnonneg : 0 ≤ Y) (ε : ℝ≥0) (n : ι)
     (hY_cont : ∀ ω, IsRightContinuous (Y · ω)) :
     ε * P.real {ω | (ε : ℝ≥0∞) ≤ ⨆ i : Set.Iic n, ENNReal.ofReal (Y i ω)} ≤
@@ -404,7 +403,9 @@ theorem maximal_ineq_ennreal (hsub : Submartingale Y 𝓕 P) (hnonneg : 0 ≤ Y)
         obtain ⟨k, hk⟩ := hS.exists_mem_open isOpen_Ioo this
         exact ⟨⟨k, hk.1⟩, hu.2 hk.2⟩
   have h2 (ω : Ω) : ⨆ s : S, ENNReal.ofReal (Y s ω) =
-    ⨆ s ≤ (⟨⟨n, le_rfl⟩, hn⟩ : S), ENNReal.ofReal (Y s ω) := by simp_all [iSup_subtype]
+    ⨆ s ≤ (⟨⟨n, le_rfl⟩, hn⟩ : S), ENNReal.ofReal (Y s ω) := by
+    have hle (s : S) : s ≤ (⟨⟨n, le_rfl⟩, hn⟩ : S) := s.1.2
+    simp [hle]
   calc
   _ = ε * P.real {ω | ε ≤ ⨆ s : S, ENNReal.ofReal (Y s ω)} := by simp [h1]
   _ = ε * P.real {ω | ε ≤ ⨆ s ≤ (⟨⟨n, le_rfl⟩, hn⟩ : S), ENNReal.ofReal (Y s ω)} := by simp [h2]
