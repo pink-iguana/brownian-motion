@@ -10,7 +10,6 @@ public import BrownianMotion.Auxiliary.MeanInequalities
 public import BrownianMotion.Auxiliary.MeasureTheory
 public import BrownianMotion.StochasticIntegral.ClassD
 public import BrownianMotion.StochasticIntegral.DoobLp
-public import BrownianMotion.StochasticIntegral.QuasiMartingale.CadlagModification
 
 /-! # Square integrable martingales
 
