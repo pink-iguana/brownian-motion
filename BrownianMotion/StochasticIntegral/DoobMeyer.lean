@@ -925,7 +925,7 @@ when `α` satisfies `NoTopOrder α`. -/
 lemma Dense.monotone_of_isRightContinuous {α β : Type*} [LinearOrder α] [OrderTop α]
     [TopologicalSpace α] [OrderTopology α] [DenselyOrdered α] [TopologicalSpace β]
     [Preorder β] [t : OrderClosedTopology β] {f : α → β} {D : Set α} (hD : Dense D) (htop : ⊤ ∈ D)
-    (hm : Monotone (f ∘ (↑) : D → β)) (hf : f.IsRightContinuous) :
+    (hm : Monotone (f ∘ (↑) : D → β)) (hf : IsRightContinuous f) :
     Monotone f := by
   refine monotone_iff_forall_lt.2 fun a b hab => ?_
   by_cases! hbtop : b = ⊤

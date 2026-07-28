@@ -642,7 +642,8 @@ theorem integral_assoc {B₁ : E →L[ℝ] H →L[ℝ] I} {B₂ : F →L[ℝ] G 
         ((Xi (p.2 ⊓ q.2) ω - Xi (p.2 ⊓ q.1) ω) - (Xi (p.1 ⊓ q.2) ω - Xi (p.1 ⊓ q.1) ω)) := by
       simp only [integral, stoppedProcess_integral,
         stoppedProcess_stoppedProcess, map_sub, Finsupp.sum_sub, map_finsuppSum]
-      congr! 6 with p v q w <;> simp [Xi, hB, stoppedProcess, min_left_comm, min_assoc]
+      congr! 6 with p v q w <;> simp [Xi, hB, stoppedProcess, min_left_comm, min_assoc,
+        -stoppedProcess_of_eq_coe]
     _ = V.value.sum fun p v ↦ W.value.sum fun q w ↦ if q.1 ≤ p.2 ∧ p.1 ≤ q.2 then
         B₄ (B₃ (v ω) (w ω)) (Xi (p.2 ⊓ q.2) ω - Xi (p.1 ⊔ q.1) ω) else 0 := by
       refine Finsupp.sum_congr fun p hp ↦ ?_

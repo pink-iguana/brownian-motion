@@ -29,6 +29,7 @@ public import BrownianMotion.Auxiliary.SeparableSpace
 public import BrownianMotion.Auxiliary.SetAlgebra
 public import BrownianMotion.Auxiliary.StandardBorel
 public import BrownianMotion.Auxiliary.StoppedProcess
+public import BrownianMotion.Auxiliary.StoppedValue
 public import BrownianMotion.Auxiliary.StronglyMeasurablePath
 public import BrownianMotion.Auxiliary.Topology
 public import BrownianMotion.Auxiliary.Upcrossing
@@ -56,6 +57,7 @@ public import BrownianMotion.Gaussian.StochasticProcesses
 public import BrownianMotion.StochasticIntegral.ApproxSeq
 public import BrownianMotion.StochasticIntegral.Cadlag
 public import BrownianMotion.StochasticIntegral.ClassD
+public import BrownianMotion.StochasticIntegral.ContinuousSquareIntegrable
 public import BrownianMotion.StochasticIntegral.ConvexWeights
 public import BrownianMotion.StochasticIntegral.DoobLp
 public import BrownianMotion.StochasticIntegral.DoobMeyer
