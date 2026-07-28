@@ -235,5 +235,3 @@ theorem measurable_eVariationOn_of_continuousWithinAt_Iio [OrderTopology ι]
     (s := OrderDual.ofDual ⁻¹' s) (X := fun i ↦ X (OrderDual.ofDual i)) hX hcont
 
 end SecondCountableTopology
-
-#min_imports
