@@ -177,13 +177,13 @@ namespace SimpleProcess
 attribute [fun_prop] measurable_valueBot
 
 -- todo: replace the condition on W by IsPredictable
-set_option backward.isDefEq.respectTransparency false in
 def ofNat {𝓕 : Filtration ℕ mΩ} (W : ℕ → Ω → E) (n : ℕ)
     (hW0 : Measurable[𝓕 0] (W 0)) (hW : ∀ k < n, Measurable[𝓕 k] (W (k + 1)))
     {C : ℝ} (hC : ∀ k ≤ n, ∀ ω, ‖W k ω‖ ≤ C) :
     SimpleProcess E 𝓕 where
   valueBot := W 0
-  value := Finsupp.onFinset ((Finset.range n).map ⟨fun k ↦ (k, k + 1), fun _ ↦ by grind⟩)
+  value := Finsupp.onFinset ((Finset.range n).map
+      ⟨fun k ↦ (k, k + 1), Function.LeftInverse.injective (g := Prod.fst) fun _ ↦ rfl⟩)
       (fun p ↦ if p.1 < n ∧ p.2 = p.1 + 1 then W p.2 else 0)
       (fun p ↦ by simp; grind)
   le_of_mem_support_value p hp := by simp at hp; grind
@@ -458,7 +458,6 @@ theorem stoppedProcess_integral (V : SimpleProcess E 𝓕) (X : ι → Ω → F)
   conv_rhs => rw [stoppedProcess_stoppedProcess]
   simp [stoppedProcess, WithTop.untopA_eq_untop]
 
-set_option backward.isDefEq.respectTransparency false in
 lemma integral_ofNat {𝓕 : Filtration ℕ mΩ} (W : ℕ → Ω → E) (n : ℕ)
     (hW0 : Measurable[𝓕 0] (W 0)) (hW : ∀ k < n, Measurable[𝓕 k] (W (k + 1)))
     {C : ℝ} (hC : ∀ k ≤ n, ∀ ω, ‖W k ω‖ ≤ C)

@@ -69,7 +69,6 @@ theorem OrthonormalBasis.norm_sq_eq_sum_sq_inner_left {ι E : Type*} [NormedAddC
     ‖x‖ ^ 2 = ∑ i, ⟪x, b i⟫_ℝ ^ 2 := by
   simp_rw [b.norm_sq_eq_sum_sq_inner_right, real_inner_comm]
 
-set_option backward.isDefEq.respectTransparency false in
 lemma EuclideanSpace.real_inner_eq {ι : Type*} [Fintype ι] (x y : EuclideanSpace ℝ ι) :
     ⟪x, y⟫_ℝ = ∑ i, x i * y i := by
   nth_rw 1 [← (EuclideanSpace.basisFun ι ℝ).sum_repr' x, sum_inner]
