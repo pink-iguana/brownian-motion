@@ -1152,7 +1152,7 @@ In Mathlib, we have results about convergence of martingales to their limit in d
 \begin{theorem}\label{thm:tendsto_limitProcess_of_cadlag}
   \uses{def:Martingale, def:limitProcess, def:IsCadlag}
   \leanok
-  \lean{MeasureTheory.UniformIntegrable.ae_tendsto_limitProcess}
+  \lean{MeasureTheory.Martingale.ae_tendsto_limitProcess}
 Let $X$ be an uniformly integrable cadlag martingale with respect to the filtration $\mathcal{F}$.
 Then there exists a limit process $X_\infty$ measurable with respect to $\mathcal{F}_\infty$ such that $X_t$ converges to $X_\infty$ almost surely as $t$ goes to infinity.
 Furthermore, $X_t = P[X_\infty \mid \mathcal{F}_t]$ almost surely.
@@ -1245,7 +1245,7 @@ Let $X : T \to \Omega \to E$ be a process such that there exists $g : \Omega \to
 \begin{lemma}\label{lem:limitProcess_stoppedProcess}
   \uses{def:limitProcess, def:Martingale}
   \leanok
-  \lean{ProbabilityTheory.limitProcess_stoppedProcess}
+  \lean{MeasureTheory.Filtration.limitProcess_stoppedProcess}
 Let $M$ be a càdlàg uniformly integrable martingale and $\tau$ be a stopping time. Then almost surely, $X^\tau_\infty = X_\tau$.
 \end{lemma}
 

@@ -13,6 +13,8 @@ public import BrownianMotion.StochasticIntegral.SquareIntegrable
 
 -/
 
+@[expose] public section
+
 namespace ProbabilityTheory
 
 open MeasureTheory Filter Function TopologicalSpace MeasureTheory.AEEqProcess

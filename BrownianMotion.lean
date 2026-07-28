@@ -57,6 +57,7 @@ public import BrownianMotion.Gaussian.StochasticProcesses
 public import BrownianMotion.StochasticIntegral.ApproxSeq
 public import BrownianMotion.StochasticIntegral.Cadlag
 public import BrownianMotion.StochasticIntegral.ClassD
+public import BrownianMotion.StochasticIntegral.ContinuousSquareIntegrable
 public import BrownianMotion.StochasticIntegral.ConvexWeights
 public import BrownianMotion.StochasticIntegral.DoobLp
 public import BrownianMotion.StochasticIntegral.DoobMeyer
