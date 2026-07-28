@@ -24,10 +24,7 @@ public import Mathlib.Topology.EMetricSpace.VariationOnFromTo
 * `MeasureTheory.StronglyAdapted.measurable_variationProcess_of_continuous`,
   `..._of_continuousWithinAt_Ioi` and `..._of_continuousWithinAt_Iio`: for `a ≤ t`, the value at
   time `t` of the variation process of a strongly adapted process is `𝓕 t`-measurable, assuming
-  continuous, right-continuous and left-continuous paths respectively. The continuous case assumes
-  separability of the time index, the two others second countability; see
-  `BrownianMotion.Auxiliary.EVariationOn` for a discussion of these assumptions, and for the
-  results about the variation of a function that these proofs rely on.
+  continuous, right-continuous and left-continuous paths respectively.
 
 -/
 
@@ -73,7 +70,8 @@ continuous paths is `𝓕 t`-measurable. -/
 theorem MeasureTheory.StronglyAdapted.measurable_variationProcess_of_continuous [OrderTopology ι]
     [SeparableSpace ι] {𝓕 : Filtration ι mΩ} {X : ι → Ω → E}
     (hX : StronglyAdapted 𝓕 X) {a t : ι} (hcont : ∀ ω, ContinuousOn (X · ω) (Ici a))
-    (hat : a ≤ t) : Measurable[𝓕 t] (variationProcess X a t) := by
+    (hat : a ≤ t) :
+    Measurable[𝓕 t] (variationProcess X a t) := by
   rw [funext fun ω ↦ variationProcess_eq_toReal_eVariationOn_Icc X hat ω]
   exact Measurable.ennreal_toReal <| measurable_eVariationOn_of_continuousWithinAt
     (fun i hi ↦ (hX i).mono (𝓕.mono hi.2)) fun ω ↦ (hcont ω).mono Icc_subset_Ici_self
@@ -95,7 +93,8 @@ right-continuous paths is `𝓕 t`-measurable. -/
 theorem MeasureTheory.StronglyAdapted.measurable_variationProcess_of_continuousWithinAt_Ioi
     [OrderTopology ι] [SecondCountableTopology ι] {𝓕 : Filtration ι mΩ} {X : ι → Ω → E}
     (hX : StronglyAdapted 𝓕 X) (hcont : ∀ ω, ∀ i, ContinuousWithinAt (X · ω) (Ioi i) i)
-    {a t : ι} (hat : a ≤ t) : Measurable[𝓕 t] (variationProcess X a t) := by
+    {a t : ι} (hat : a ≤ t) :
+    Measurable[𝓕 t] (variationProcess X a t) := by
   rw [funext fun ω ↦ variationProcess_eq_toReal_eVariationOn_Icc X hat ω]
   exact Measurable.ennreal_toReal <| measurable_eVariationOn_of_continuousWithinAt_Ioi
     (fun i hi ↦ (hX i).mono (𝓕.mono hi.2)) fun ω i _ ↦ (hcont ω i).mono inter_subset_right
@@ -113,7 +112,8 @@ left-continuous paths is `𝓕 t`-measurable. -/
 theorem MeasureTheory.StronglyAdapted.measurable_variationProcess_of_continuousWithinAt_Iio
     [OrderTopology ι] [SecondCountableTopology ι] {𝓕 : Filtration ι mΩ} {X : ι → Ω → E}
     (hX : StronglyAdapted 𝓕 X) (hcont : ∀ ω, ∀ i, ContinuousWithinAt (X · ω) (Iio i) i)
-    {a t : ι} (hat : a ≤ t) : Measurable[𝓕 t] (variationProcess X a t) := by
+    {a t : ι} (hat : a ≤ t) :
+    Measurable[𝓕 t] (variationProcess X a t) := by
   rw [funext fun ω ↦ variationProcess_eq_toReal_eVariationOn_Icc X hat ω]
   exact Measurable.ennreal_toReal <| measurable_eVariationOn_of_continuousWithinAt_Iio
     (fun i hi ↦ (hX i).mono (𝓕.mono hi.2)) fun ω i _ ↦ (hcont ω i).mono inter_subset_right

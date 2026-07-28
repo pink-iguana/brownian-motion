@@ -14,8 +14,8 @@ public import Mathlib.Topology.EMetricSpace.BoundedVariation
 # Variation of a function over a countable or dense set of points
 
 The variation of a function over a set is an uncountable supremum, so it is not measurable in a
-parameter for free. This file provides tools to compute it over a *countable* set of points
-instead, and deduces measurability of the variation of a family of functions.
+parameter for free. This file provides tools to compute it over a countable set of points instead,
+and deduces measurability of the variation of a family of functions.
 
 ## Main results
 
@@ -34,10 +34,6 @@ this file provides two independent sets of assumptions:
   `measurable_eVariationOn_of_continuousWithinAt_Ioi`, together with the left-continuous
   counterparts `eVariationOn_eq_comp_val_of_dense_Iio` and
   `measurable_eVariationOn_of_continuousWithinAt_Iio`.
-
-Neither hypothesis implies the other, and the second genuinely needs second countability: a
-separable linearly ordered set can have uncountably many right isolated points (e.g.
-https://topology.pi-base.org/spaces/S000093).
 
 -/
 
@@ -239,3 +235,5 @@ theorem measurable_eVariationOn_of_continuousWithinAt_Iio [OrderTopology ι]
     (s := OrderDual.ofDual ⁻¹' s) (X := fun i ↦ X (OrderDual.ofDual i)) hX hcont
 
 end SecondCountableTopology
+
+#min_imports
