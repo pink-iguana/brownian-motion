@@ -256,9 +256,8 @@ lemma IsAESquareIntegrable.indist_toContinuous (hX1 : ∀ᵐ ω ∂P, Continuous
   simp_rw [h2] at h1
   simp [toContinuous, h1, h2]
 
-variable [SigmaFiniteFiltration P 𝓕]
-
-lemma IsSquareIntegrable.submartingale_sq_norm [CompleteSpace E] (hX : IsSquareIntegrable X 𝓕 P) :
+lemma IsSquareIntegrable.submartingale_sq_norm [SigmaFiniteFiltration P 𝓕] [CompleteSpace E]
+    (hX : IsSquareIntegrable X 𝓕 P) :
     Submartingale (fun i ω ↦ ‖X i ω‖ ^ 2) 𝓕 P := by
   refine hX.1.submartingale_convex_comp (φ := fun x ↦ ‖x‖ ^ 2) ?_ (by fun_prop) fun i ↦ ?_
   · exact ConvexOn.pow convexOn_univ_norm (fun _ _ ↦ by positivity) 2
@@ -266,8 +265,8 @@ lemma IsSquareIntegrable.submartingale_sq_norm [CompleteSpace E] (hX : IsSquareI
     · exact hX.1.1.stronglyMeasurable.aestronglyMeasurable
     · exact lt_of_le_of_lt (le_iSup (fun i ↦ eLpNorm (X i) 2 P) i) hX.3
 
-lemma IsSquareIntegrable.eLpNorm_mono [CompleteSpace E] (hX : IsSquareIntegrable X 𝓕 P)
-    {i j : ι} (hij : i ≤ j) :
+lemma IsSquareIntegrable.eLpNorm_mono [SigmaFiniteFiltration P 𝓕] [CompleteSpace E]
+    (hX : IsSquareIntegrable X 𝓕 P) {i j : ι} (hij : i ≤ j) :
     eLpNorm (X i) 2 P ≤ eLpNorm (X j) 2 P := by
   have : ∫ ω, ‖X i ω‖ ^ 2 ∂P ≤ ∫ ω, ‖X j ω‖ ^ 2 ∂P := by
     simpa using hX.submartingale_sq_norm.setIntegral_le hij MeasurableSet.univ
@@ -284,15 +283,10 @@ lemma IsSquareIntegrable.eLpNorm_mono [CompleteSpace E] (hX : IsSquareIntegrable
   _ = eLpNorm (X j) 2 P := by
     simp [eLpNorm_eq_lintegral_rpow_enorm_toReal]
 
-lemma _root_.MeasureTheory.UniformIntegrable.ae_tendsto_limitProcess
-    (hX1 : UniformIntegrable X 1 P) (hX2 : Martingale X 𝓕 P) :
-    ∀ᵐ ω ∂P, Tendsto (X · ω) atTop (𝓝 (𝓕.limitProcess X P ω)) := by
-  sorry
-
 lemma IsSquareIntegrable.ae_tendsto_limitProcess [IsFiniteMeasure P]
     (hX : IsSquareIntegrable X 𝓕 P) :
     ∀ᵐ ω ∂P, Tendsto (X · ω) atTop (𝓝 (𝓕.limitProcess X P ω)) :=
-  hX.uniformIntegrable.ae_tendsto_limitProcess hX.martingale
+  hX.martingale.ae_tendsto_limitProcess hX.uniformIntegrable hX.isRightContinuous
 
 lemma IsAESquareIntegrable.ae_tendsto_limitProcess [IsFiniteMeasure P]
     (hX : IsAESquareIntegrable X 𝓕 P) :
@@ -303,49 +297,45 @@ lemma IsAESquareIntegrable.ae_tendsto_limitProcess [IsFiniteMeasure P]
   exact h2.congr (fun t ↦ (h1 t).symm)
 
 @[to_fun limitProcess_fun_add]
+lemma IsSquareIntegrable.limitProcess_add [Nonempty ι] [IsFiniteMeasure P]
+    (hX : IsSquareIntegrable X 𝓕 P) (hY : IsSquareIntegrable Y 𝓕 P) :
+    𝓕.limitProcess (X + Y) P =ᵐ[P] 𝓕.limitProcess X P + 𝓕.limitProcess Y P :=
+  hX.martingale.limitProcess_add hX.uniformIntegrable hX.isRightContinuous
+    hY.martingale hY.uniformIntegrable hY.isRightContinuous
+
+@[to_fun limitProcess_fun_sub]
+lemma IsSquareIntegrable.limitProcess_sub [Nonempty ι] [IsFiniteMeasure P]
+    (hX : IsSquareIntegrable X 𝓕 P) (hY : IsSquareIntegrable Y 𝓕 P) :
+    𝓕.limitProcess (X - Y) P =ᵐ[P] 𝓕.limitProcess X P - 𝓕.limitProcess Y P :=
+  hX.martingale.limitProcess_sub hX.uniformIntegrable hX.isRightContinuous
+    hY.martingale hY.uniformIntegrable hY.isRightContinuous
+
+@[to_fun limitProcess_fun_add]
 lemma IsAESquareIntegrable.limitProcess_add [Nonempty ι] [IsFiniteMeasure P]
     (hX : IsAESquareIntegrable X 𝓕 P) (hY : IsAESquareIntegrable Y 𝓕 P) :
     𝓕.limitProcess (X + Y) P =ᵐ[P] 𝓕.limitProcess X P + 𝓕.limitProcess Y P := by
-  apply 𝓕.limitProcess_ae_eq
-    (𝓕.stronglyMeasurable_limitProcess.add 𝓕.stronglyMeasurable_limitProcess)
-  filter_upwards [hX.ae_tendsto_limitProcess, hY.ae_tendsto_limitProcess] with ω h1 h2 using
-    h1.add h2
+  grw [hX.choose_spec.2, hY.choose_spec.2, hX.choose_spec.1.limitProcess_add hY.choose_spec.1]
 
 @[to_fun limitProcess_fun_sub]
 lemma IsAESquareIntegrable.limitProcess_sub [Nonempty ι] [IsFiniteMeasure P]
     (hX : IsAESquareIntegrable X 𝓕 P) (hY : IsAESquareIntegrable Y 𝓕 P) :
     𝓕.limitProcess (X - Y) P =ᵐ[P] 𝓕.limitProcess X P - 𝓕.limitProcess Y P := by
-  apply 𝓕.limitProcess_ae_eq
-    (𝓕.stronglyMeasurable_limitProcess.sub 𝓕.stronglyMeasurable_limitProcess)
-  filter_upwards [hX.ae_tendsto_limitProcess, hY.ae_tendsto_limitProcess] with ω h1 h2 using
-    h1.sub h2
+  grw [hX.choose_spec.2, hY.choose_spec.2, hX.choose_spec.1.limitProcess_sub hY.choose_spec.1]
 
 variable (𝓕) in
 lemma tendsto_ae_condExp' (X : Ω → E) :
     ∀ᵐ ω ∂P, Tendsto (P[X | 𝓕 ·] ω) atTop (𝓝 (P[X | ⨆ t, 𝓕 t] ω)) := by
   sorry
 
-lemma _root_.MeasureTheory.Martingale.condExp_limitProcess_ae_eq
-    (hX1 : Martingale X 𝓕 P) (hX2 : UniformIntegrable X 1 P)
-    (hX3 : ∀ ω, IsCadlag (X · ω)) (t : ι) :
-    P[𝓕.limitProcess X P | 𝓕 t] =ᵐ[P] X t := by
-  sorry
-
-lemma _root_.MeasureTheory.Martingale.condExp_limitProcess_ae_eq'
-    (hX1 : Martingale X 𝓕 P) (hX2 : UniformIntegrable X 1 P)
-    (hX3 : ∀ ω, IsCadlag (X · ω)) (hτ : IsStoppingTime 𝓕 τ) :
-    P[𝓕.limitProcess X P | hτ.measurableSpace] =ᵐ[P] 𝓕.stoppedValue' X τ P := by
-  sorry
-
 lemma IsSquareIntegrable.condExp_limitProcess_ae_eq [IsFiniteMeasure P]
     (hX : IsSquareIntegrable X 𝓕 P) (t : ι) :
     P[𝓕.limitProcess X P | 𝓕 t] =ᵐ[P] X t :=
-  hX.martingale.condExp_limitProcess_ae_eq hX.uniformIntegrable hX.cadlag t
+  hX.martingale.condExp_limitProcess_ae_eq hX.uniformIntegrable hX.isRightContinuous t
 
 lemma IsSquareIntegrable.condExp_limitProcess_ae_eq' [IsFiniteMeasure P]
     (hX : IsSquareIntegrable X 𝓕 P) (hτ : IsStoppingTime 𝓕 τ) :
     P[𝓕.limitProcess X P | hτ.measurableSpace] =ᵐ[P] 𝓕.stoppedValue' X τ P :=
-  hX.martingale.condExp_limitProcess_ae_eq' hX.uniformIntegrable hX.cadlag hτ
+  hX.martingale.condExp_limitProcess_ae_eq' hX.uniformIntegrable hX.isRightContinuous hτ
 
 attribute [gcongr] condExp_congr_ae
 
@@ -365,22 +355,14 @@ lemma IsSquareIntegrable.tendsto_eLpNorm_two_limitProcess (hX : IsSquareIntegrab
     Tendsto (fun i ↦ eLpNorm (X i - 𝓕.limitProcess X P) 2 P) atTop (𝓝 0) := by
   sorry
 
-lemma iSup_eLpNorm_le_eLpNorm_limitProcess (hX1 : Martingale X 𝓕 P)
-    (hX2 : ∀ ω, IsCadlag (X · ω)) [CompleteSpace E]
-    (hX3 : UniformIntegrable X 1 P) :
-    ⨆ t, eLpNorm (X t) 2 P ≤ eLpNorm (𝓕.limitProcess X P) 2 P := by
-  refine iSup_le fun t ↦ ?_
-  rw [eLpNorm_congr_ae (hX1.condExp_limitProcess_ae_eq hX3 hX2 t).symm]
-  exact eLpNorm_condExp_le_eLpNorm _ (by simp)
-
 lemma isSquareIntegrable_of_limitProcess [CompleteSpace E]
-    (hX1 : Martingale X 𝓕 P) (hX2 : ∀ ω, IsCadlag (X · ω))
-    (hX3 : UniformIntegrable X 1 P) (hX4 : MemLp (𝓕.limitProcess X P) 2 P) :
+    (hX1 : Martingale X 𝓕 P) (hX2 : UniformIntegrable X 1 P) (hX3 : ∀ ω, IsCadlag (X · ω))
+    (hX4 : MemLp (𝓕.limitProcess X P) 2 P) :
     IsSquareIntegrable X 𝓕 P where
   martingale := hX1
-  cadlag := hX2
+  cadlag := hX3
   bounded := by
-    grw [iSup_eLpNorm_le_eLpNorm_limitProcess hX1 hX2 hX3]
+    grw [iSup_eLpNorm_le_eLpNorm_limitProcess hX1 hX2 (fun ω ↦ (hX3 ω).right_continuous) (by simp)]
     exact hX4.2
 
 lemma IsSquareIntegrable.iSup_eLpNorm_eq_eLpNorm_limitProcess (hX : IsSquareIntegrable X 𝓕 P) :
@@ -445,28 +427,12 @@ theorem IsAESquareIntegrable.integral_iSup_norm_rpow_rpow_inv_le_limitProcess
 
 variable [OrderBot ι]
 
-lemma limitProcess_stoppedProcess (hX1 : Martingale X 𝓕 P) (hX2 : UniformIntegrable X 1 P)
-    (hX3 : ∀ ω, IsRightContinuous (X · ω)) (hτ : IsStoppingTime 𝓕 τ) :
-    𝓕.limitProcess (stoppedProcess X τ) P =ᵐ[P] 𝓕.stoppedValue' X τ P := by
-  borelize ι E
-  apply 𝓕.limitProcess_ae_eq
-  · exact 𝓕.stronglyMeasurable_stoppedValue'
-      (hX1.stronglyAdapted.isStronglyProgressive_of_rightContinuous hX3) hX3 hτ |>.mono
-      hτ.measurableSpace_le'
-  filter_upwards [hX2.ae_tendsto_limitProcess hX1] with ω h
-  cases h1 : τ ω with
-  | top => simpa [h1]
-  | coe t =>
-    simp only [h1, WithTop.coe_inj, stoppedProcess_of_eq_coe, Filtration.stoppedValue'_of_eq_coe]
-    exact tendsto_const_nhds.congr' (eventually_atTop.2 ⟨t, fun s hs ↦ by simp [hs]⟩)
-
 variable [IsFiniteMeasure P]
 
 lemma IsSquareIntegrable.limitProcess_stoppedProcess
     (hX : IsSquareIntegrable X 𝓕 P) (hτ : IsStoppingTime 𝓕 τ) :
     𝓕.limitProcess (stoppedProcess X τ) P =ᵐ[P] 𝓕.stoppedValue' X τ P :=
-  ProbabilityTheory.limitProcess_stoppedProcess hX.martingale hX.uniformIntegrable
-    (fun ω ↦ (hX.cadlag ω).right_continuous) hτ
+  𝓕.limitProcess_stoppedProcess hX.martingale hX.uniformIntegrable hX.isRightContinuous hτ
 
 lemma IsAESquareIntegrable.limitProcess_stoppedProcess
     (hX : IsAESquareIntegrable X 𝓕 P) (hτ : IsStoppingTime 𝓕 τ) :
@@ -482,12 +448,12 @@ protected lemma IsSquareIntegrable.stoppedProcess
   borelize ι E
   apply isSquareIntegrable_of_limitProcess
   · exact hX.martingale.stoppedProcess (fun _ ↦ (hX.cadlag _).right_continuous) hτ
-  · exact fun ω ↦ (hX.cadlag ω).stoppedProcess τ
   · have : ClassD X 𝓕 P := hX.martingale.classD_iff_uniformIntegrable hX.isRightContinuous |>.2
         hX.uniformIntegrable
     simp_rw [stoppedProcess_eq_stoppedValue]
     exact this.uniformIntegrable.comp (fun t : ι ↦ ⟨fun ω ↦ min t (τ ω),
       (isStoppingTime_const 𝓕 t).min hτ, by simp⟩)
+  · exact fun ω ↦ (hX.cadlag ω).stoppedProcess τ
   · refine ⟨𝓕.stronglyMeasurable_limit_process'.aestronglyMeasurable, ?_⟩
     rw [eLpNorm_lt_top_iff_lintegral_rpow_enorm_lt_top (by simp) (by simp)]
     calc

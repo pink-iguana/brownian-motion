@@ -5,7 +5,11 @@ Authors: Rémy Degenne
 -/
 module
 
+public import BrownianMotion.Auxiliary.Adapted
 public import BrownianMotion.Auxiliary.Jensen
+public import BrownianMotion.Auxiliary.StoppedProcess
+public import BrownianMotion.Auxiliary.StoppedValue
+public import BrownianMotion.StochasticIntegral.Cadlag
 public import Mathlib.Probability.Martingale.OptionalSampling
 
 /-!
@@ -13,12 +17,14 @@ public import Mathlib.Probability.Martingale.OptionalSampling
 
 -/
 
-@[expose] public section
+public section
 
+open Filter MeasureTheory
 open scoped NNReal ENNReal Topology
-open Filter
 
 namespace MeasureTheory
+
+section UniformIntegrable
 
 variable {ι κ Ω E F : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
 
@@ -418,5 +424,89 @@ lemma tendstoInMeasure_bounded
     (hf : ∀ i, AEStronglyMeasurable (f i) μ) : eLpNorm g p μ ≤ C := by
   obtain ⟨l, hl⟩ := h_tendsto.exists_seq_tendsto_ae'
   exact seq_tendsto_ae_bounded p (fun n => bound (l n)) hl.2 (fun n => hf (l n))
+
+end UniformIntegrable
+
+section Martingale
+
+/-! ### Uniformly integrable martingales -/
+
+variable {ι Ω E : Type*} [LinearOrder ι] {mΩ : MeasurableSpace Ω} {P : Measure Ω}
+  {𝓕 : Filtration ι mΩ} {X Y : ι → Ω → E} {τ : Ω → WithTop ι} [NormedAddCommGroup E]
+  [NormedSpace ℝ E] [TopologicalSpace ι]
+
+/-- A càdlàg uniformly integrable martingale converges. -/
+lemma Martingale.ae_tendsto_limitProcess
+    (hX1 : Martingale X 𝓕 P) (hX2 : UniformIntegrable X 1 P)
+    (hX3 : ∀ ω, IsRightContinuous (X · ω)) :
+    ∀ᵐ ω ∂P, Tendsto (X · ω) atTop (𝓝 (𝓕.limitProcess X P ω)) := by
+  sorry
+
+@[to_fun limitProcess_fun_add]
+lemma Martingale.limitProcess_add [Nonempty ι]
+    (hX1 : Martingale X 𝓕 P) (hX2 : UniformIntegrable X 1 P)
+    (hX3 : ∀ ω, IsRightContinuous (X · ω))
+    (hY1 : Martingale Y 𝓕 P) (hY2 : UniformIntegrable Y 1 P)
+    (hY3 : ∀ ω, IsRightContinuous (Y · ω)) :
+    𝓕.limitProcess (X + Y) P =ᵐ[P] 𝓕.limitProcess X P + 𝓕.limitProcess Y P := by
+  apply 𝓕.limitProcess_ae_eq
+    (𝓕.stronglyMeasurable_limitProcess.add 𝓕.stronglyMeasurable_limitProcess)
+  filter_upwards [hX1.ae_tendsto_limitProcess hX2 hX3,
+    hY1.ae_tendsto_limitProcess hY2 hY3] with ω h1 h2 using h1.add h2
+
+@[to_fun limitProcess_fun_sub]
+lemma Martingale.limitProcess_sub [Nonempty ι]
+    (hX1 : Martingale X 𝓕 P) (hX2 : UniformIntegrable X 1 P)
+    (hX3 : ∀ ω, IsRightContinuous (X · ω))
+    (hY1 : Martingale Y 𝓕 P) (hY2 : UniformIntegrable Y 1 P)
+    (hY3 : ∀ ω, IsRightContinuous (Y · ω)) :
+    𝓕.limitProcess (X - Y) P =ᵐ[P] 𝓕.limitProcess X P - 𝓕.limitProcess Y P := by
+  apply 𝓕.limitProcess_ae_eq
+    (𝓕.stronglyMeasurable_limitProcess.sub 𝓕.stronglyMeasurable_limitProcess)
+  filter_upwards [hX1.ae_tendsto_limitProcess hX2 hX3,
+    hY1.ae_tendsto_limitProcess hY2 hY3] with ω h1 h2 using h1.sub h2
+
+/-- For a càdlàg uniformly integrable martingale, `P[X ∞ | 𝓕 t] = X t`. -/
+lemma Martingale.condExp_limitProcess_ae_eq
+    (hX1 : Martingale X 𝓕 P) (hX2 : UniformIntegrable X 1 P)
+    (hX3 : ∀ ω, IsRightContinuous (X · ω)) (t : ι) :
+    P[𝓕.limitProcess X P | 𝓕 t] =ᵐ[P] X t := by
+  sorry
+
+/-- For a càdlàg uniformly integrable martingale and a stopping time `τ`, `P[X ∞ | 𝓕 τ] = X τ`. -/
+lemma Martingale.condExp_limitProcess_ae_eq'
+    (hX1 : Martingale X 𝓕 P) (hX2 : UniformIntegrable X 1 P)
+    (hX3 : ∀ ω, IsRightContinuous (X · ω)) (hτ : IsStoppingTime 𝓕 τ) :
+    P[𝓕.limitProcess X P | hτ.measurableSpace] =ᵐ[P] 𝓕.stoppedValue' X τ P := by
+  sorry
+
+/-- For a càdlàg uniformly integrable martingale, `⨆ t, ‖X t‖ₑ ≤ ‖X ∞‖ₑ`. -/
+lemma iSup_eLpNorm_le_eLpNorm_limitProcess [CompleteSpace E]
+    (hX1 : Martingale X 𝓕 P) (hX2 : UniformIntegrable X 1 P) (hX3 : ∀ ω, IsRightContinuous (X · ω))
+     {p : ℝ≥0∞} (hp : 1 ≤ p) :
+    ⨆ t, eLpNorm (X t) p P ≤ eLpNorm (𝓕.limitProcess X P) p P := by
+  refine iSup_le fun t ↦ ?_
+  rw [eLpNorm_congr_ae (hX1.condExp_limitProcess_ae_eq hX2 hX3 t).symm]
+  exact eLpNorm_condExp_le_eLpNorm _ hp
+
+lemma Filtration.limitProcess_stoppedProcess [OrderBot ι] [OrderTopology ι]
+    [SecondCountableTopology ι]
+    (hX1 : Martingale X 𝓕 P) (hX2 : UniformIntegrable X 1 P)
+    (hX3 : ∀ ω, _root_.IsRightContinuous (X · ω))
+    (hτ : IsStoppingTime 𝓕 τ) :
+    𝓕.limitProcess (stoppedProcess X τ) P =ᵐ[P] 𝓕.stoppedValue' X τ P := by
+  borelize ι E
+  apply 𝓕.limitProcess_ae_eq
+  · exact 𝓕.stronglyMeasurable_stoppedValue'
+      (hX1.stronglyAdapted.isStronglyProgressive_of_rightContinuous hX3) hX3 hτ |>.mono
+      hτ.measurableSpace_le'
+  filter_upwards [hX1.ae_tendsto_limitProcess hX2 hX3] with ω h
+  cases h1 : τ ω with
+  | top => simpa [h1]
+  | coe t =>
+    simp only [h1, WithTop.coe_inj, stoppedProcess_of_eq_coe, Filtration.stoppedValue'_of_eq_coe]
+    exact tendsto_const_nhds.congr' (eventually_atTop.2 ⟨t, fun s hs ↦ by simp [hs]⟩)
+
+end Martingale
 
 end MeasureTheory
