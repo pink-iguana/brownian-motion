@@ -8,6 +8,7 @@ public import BrownianMotion.Auxiliary.ContinuousBilinForm
 public import BrownianMotion.Auxiliary.ConvergenceInMeasure
 public import BrownianMotion.Auxiliary.DenseCountable
 public import BrownianMotion.Auxiliary.ENNReal
+public import BrownianMotion.Auxiliary.EVariationOn
 public import BrownianMotion.Auxiliary.Filtration
 public import BrownianMotion.Auxiliary.FiniteInf
 public import BrownianMotion.Auxiliary.HasGaussianLaw
