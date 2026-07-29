@@ -5,41 +5,36 @@ Authors: Yongxi Lin
 -/
 module
 
-public import BrownianMotion.Auxiliary.SeparableSpace
 public import Mathlib.Algebra.BigOperators.Fin
-public import Mathlib.MeasureTheory.Function.StronglyMeasurable.Basic
 public import Mathlib.Topology.EMetricSpace.BoundedVariation
 
 /-!
 # Variation of a function over a countable or dense set of points
 
 The variation of a function over a set is an uncountable supremum, so it is not measurable in a
-parameter for free. This file provides tools to compute it over a countable set of points instead,
-and deduces measurability of the variation of a family of functions.
+parameter for free. This file provides tools to compute it over a countable set of points instead.
+Measurability of the variation of a family of functions is deduced from these tools in the file
+`BrownianMotion.StochasticIntegral.VariationProcess`.
 
 ## Main results
 
 * `eVariationOn_eq_iSup_fin`: the variation over `s` as a supremum over monotone tuples with values
   in `s`.
-* `measurable_eVariationOn_of_countable`: the variation over a countable set of points is
-  measurable in the parameter.
 
 Which dense sets suffice to compute the variation depends on the regularity of the function, and
 this file provides two independent sets of assumptions:
 
 1. the first assumes **continuity** of the function together with **separability** of the domain —
-  `eVariationOn_eq_comp_val_of_dense`, `measurable_eVariationOn_of_continuousWithinAt`;
+  `eVariationOn_eq_comp_val_of_dense`;
 2. the second assumes only **right-continuity** of the function, but requires the domain to be
-  **second countable** — `eVariationOn_eq_comp_val_of_dense_Ioi`,
-  `measurable_eVariationOn_of_continuousWithinAt_Ioi`, together with the left-continuous
-  counterparts `eVariationOn_eq_comp_val_of_dense_Iio` and
-  `measurable_eVariationOn_of_continuousWithinAt_Iio`.
+  **second countable** — `eVariationOn_eq_comp_val_of_dense_Ioi`, together with the left-continuous
+  counterpart `eVariationOn_eq_comp_val_of_dense_Iio`.
 
 -/
 
 @[expose] public section
 
-open Filter MeasureTheory Set TopologicalSpace
+open Filter Set TopologicalSpace
 open scoped ENNReal Topology
 
 variable {ι Ω E : Type*}
@@ -48,36 +43,23 @@ variable [LinearOrder ι] [PseudoEMetricSpace E]
 
 /-- The variation over `s`, reindexed as a supremum over monotone tuples `Fin (n + 1) → ι` with
 values in `s`. -/
-theorem eVariationOn_eq_iSup_fin {s : Set ι} (X : ι → Ω → E) (ω : Ω) :
-    eVariationOn (X · ω) s = ⨆ (n : ℕ) (p : {u : Fin (n + 1) → ι // Monotone u ∧ ∀ i, u i ∈ s}),
-      ∑ i : Fin n, edist (X (p.1 i.succ) ω) (X (p.1 i.castSucc) ω) := by
+theorem eVariationOn_eq_iSup_fin {s : Set ι} (X : ι → E) :
+    eVariationOn X s = ⨆ (n : ℕ) (p : {u : Fin (n + 1) → ι // Monotone u ∧ ∀ i, u i ∈ s}),
+      ∑ i : Fin n, edist (X (p.1 i.succ)) (X (p.1 i.castSucc)) := by
   refine le_antisymm (iSup_le fun ⟨n, u, hu, hus⟩ ↦ ?_)
     (iSup_le fun n ↦ iSup_le fun ⟨p, hp, hps⟩ ↦ ?_)
   · let κ := fun n ↦ {u : Fin (n + 1) → ι // Monotone u ∧ ∀ i, u i ∈ s}
     let p : κ n := ⟨fun i : Fin (n + 1) ↦ u i, hu.comp Fin.val_strictMono.monotone, fun i ↦ hus i⟩
-    have : ∑ i ∈ Finset.range n, edist (X (u (i + 1)) ω) (X (u i) ω) =
-      ∑ i : Fin n, edist (X (p.1 i.succ) ω) (X (p.1 i.castSucc) ω) := by simp [Finset.sum_range, p]
+    have : ∑ i ∈ Finset.range n, edist (X (u (i + 1))) (X (u i)) =
+      ∑ i : Fin n, edist (X (p.1 i.succ)) (X (p.1 i.castSucc)) := by simp [Finset.sum_range, p]
     simpa [this] using le_iSup₂ (α := ℝ≥0∞) n p
   · let v : ℕ → ι := fun k ↦ p ⟨min k n, Nat.lt_succ_of_le (min_le_right k n)⟩
-    have : ∑ i : Fin n, edist (X (p i.succ) ω) (X (p i.castSucc) ω) =
-      ∑ i ∈ Finset.range n, edist (X (v (i + 1)) ω) (X (v i) ω) := by
+    have : ∑ i : Fin n, edist (X (p i.succ)) (X (p i.castSucc)) =
+      ∑ i ∈ Finset.range n, edist (X (v (i + 1))) (X (v i)) := by
       simp only [Finset.sum_range, Order.add_one_le_iff, Fin.is_lt, inf_of_le_left, Fin.is_le', v]
       congr
     rw [this]
     exact eVariationOn.sum_le (fun _ _ _ ↦ hp (by aesop)) fun i ↦ hps _
-
-/-- The variation of a family of functions over a countable set of points is measurable in the
-parameter. -/
-theorem measurable_eVariationOn_of_countable {m : MeasurableSpace Ω} {s : Set ι}
-    (hs : s.Countable) {X : ι → Ω → E} (hX : ∀ i ∈ s, StronglyMeasurable[m] (X i)) :
-    Measurable[m] fun ω ↦ eVariationOn (X · ω) s := by
-  simp only [eVariationOn_eq_iSup_fin]
-  refine Measurable.iSup fun n ↦ ?_
-  have : Countable {u : Fin (n + 1) → ι // Monotone u ∧ ∀ i, u i ∈ s} :=
-    (countable_pi fun _ ↦ hs).mono fun _ hu ↦ hu.2
-  refine Measurable.iSup fun p ↦ Finset.measurable_sum _ fun i _ ↦ ?_
-  exact (continuous_edist.comp_stronglyMeasurable
-    ((hX _ (p.2.2 i.succ)).prodMk (hX _ (p.2.2 i.castSucc)))).measurable
 
 variable [TopologicalSpace ι]
 
@@ -119,17 +101,6 @@ theorem eVariationOn_eq_comp_val_of_dense [OrderTopology ι] {s : Set ι} {t : S
     fun i hi ↦ (tendsto_eval_pi _ i).eventually eventually_mem_nhdsWithin
   filter_upwards [hlt, hmem] with c hclt hcmem
   exact le_iSup_of_le ⟨n, c, hclt, hcmem⟩ le_rfl
-
-/-- The variation of a family of functions that are continuous within `s` at every point of `s`,
-over the points of a set `s`, is measurable in the parameter. -/
-theorem measurable_eVariationOn_of_continuousWithinAt [OrderTopology ι]
-    [SeparableSpace ι] {m : MeasurableSpace Ω} {s : Set ι} {X : ι → Ω → E}
-    (hX : ∀ i ∈ s, StronglyMeasurable[m] (X i)) (hcont : ∀ ω, ContinuousOn (X · ω) s) :
-    Measurable[m] fun ω ↦ eVariationOn (X · ω) s := by
-  obtain ⟨t, htc, ht⟩ := exists_countable_dense s
-  simp only [fun ω ↦ eVariationOn_eq_comp_val_of_dense ht (hcont ω)]
-  exact measurable_eVariationOn_of_countable (htc.image _) fun i hi ↦ hX i
-    (Subtype.coe_image_subset s t hi)
 
 end Separable
 
@@ -193,23 +164,6 @@ theorem eVariationOn_eq_comp_val_of_dense_Ioi [OrderTopology ι] {s : Set ι} {t
   filter_upwards [hlt, hmem] with c hclt hcmem
   exact le_iSup_of_le ⟨n, c, hclt, hcmem⟩ le_rfl
 
-/-- The variation of a family of right-continuous functions over the points of a set `s` is
-measurable in the parameter. -/
-theorem measurable_eVariationOn_of_continuousWithinAt_Ioi [OrderTopology ι]
-    [SecondCountableTopology ι] {m : MeasurableSpace Ω} {s : Set ι} {X : ι → Ω → E}
-    (hX : ∀ i ∈ s, StronglyMeasurable[m] (X i))
-    (hcont : ∀ ω, ∀ i ∈ s, ContinuousWithinAt (X · ω) (s ∩ Ioi i) i) :
-    Measurable[m] fun ω ↦ eVariationOn (X · ω) s := by
-  obtain ⟨t, ht, htc, hts⟩ : ∃ t : Set s, Dense t ∧ t.Countable ∧ {x : s | 𝓝[>] x = ⊥} ⊆ t := by
-    obtain ⟨d, hdc, hdd⟩ := exists_countable_dense s
-    refine ⟨d ∪ {x : s | 𝓝[>] x = ⊥}, hdd.mono subset_union_left, hdc.union ?_, subset_union_right⟩
-    have hsub : {x : s | 𝓝[>] x = ⊥} ⊆ Subtype.val ⁻¹' {x ∈ s | 𝓝[s ∩ Ioi x] x = ⊥} :=
-      fun x hx ↦ ⟨x.2, (nhdsGT_subtype_eq_bot_iff x.2).1 hx⟩
-    exact ((countable_setOfPred_isolated_right_within).preimage Subtype.val_injective).mono hsub
-  simp only [fun ω ↦ eVariationOn_eq_comp_val_of_dense_Ioi ht hts (hcont ω)]
-  exact measurable_eVariationOn_of_countable (htc.image _) fun i hi ↦ hX i
-    (Subtype.coe_image_subset s t hi)
-
 /-- The variation of a function that is left-continuous within `s` at every point of `s` can be
 computed using only points of a dense subset `t` of `s`, provided `t` contains every point of `s`
 that is isolated on the left. -/
@@ -221,17 +175,5 @@ theorem eVariationOn_eq_comp_val_of_dense_Iio [OrderTopology ι] {s : Set ι} {t
     eVariationOn_eq_comp_val_of_dense_Ioi (s := OrderDual.ofDual ⁻¹' s)
     (f := f ∘ OrderDual.ofDual) ht hts hf]
   congr
-
-/-- The variation of a family of left-continuous functions over the points of a set `s` is
-measurable in the parameter. -/
-theorem measurable_eVariationOn_of_continuousWithinAt_Iio [OrderTopology ι]
-    [SecondCountableTopology ι] {m : MeasurableSpace Ω} {s : Set ι} {X : ι → Ω → E}
-    (hX : ∀ i ∈ s, StronglyMeasurable[m] (X i))
-    (hcont : ∀ ω, ∀ i ∈ s, ContinuousWithinAt (X · ω) (s ∩ Iio i) i) :
-    Measurable[m] fun ω ↦ eVariationOn (X · ω) s := by
-  have hdual : ∀ ω, eVariationOn (fun i ↦ X (OrderDual.ofDual i) ω) (OrderDual.ofDual ⁻¹' s)
-    = eVariationOn (X · ω) s := fun ω ↦ eVariationOn.comp_ofDual (X · ω) s
-  simpa [hdual] using measurable_eVariationOn_of_continuousWithinAt_Ioi
-    (s := OrderDual.ofDual ⁻¹' s) (X := fun i ↦ X (OrderDual.ofDual i)) hX hcont
 
 end SecondCountableTopology

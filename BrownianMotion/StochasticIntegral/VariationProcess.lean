@@ -6,6 +6,7 @@ Authors: Yongxi Lin
 module
 
 public import BrownianMotion.Auxiliary.EVariationOn
+public import BrownianMotion.Auxiliary.SeparableSpace
 public import Mathlib.Probability.Process.Adapted
 public import Mathlib.Topology.EMetricSpace.VariationOnFromTo
 
@@ -18,6 +19,13 @@ public import Mathlib.Topology.EMetricSpace.VariationOnFromTo
 
 ## Main results
 
+* `measurable_eVariationOn_of_countable`: the variation of a family of functions over a countable
+  set of points is measurable in the parameter.
+* `measurable_eVariationOn_of_continuousWithinAt`, `..._of_continuousWithinAt_Ioi` and
+  `..._of_continuousWithinAt_Iio`: the variation of a family of functions over a set `s` is
+  measurable in the parameter, assuming continuous, right-continuous and left-continuous functions
+  respectively. The first result assumes separability of the domain, the other two require it to be
+  second countable.
 * `variationProcess_nonneg`: for `a ≤ t` the variation process is nonnegative.
 * `monotone_variationProcess`: the variation process of a path of locally bounded variation is
   monotone in time.
@@ -31,10 +39,24 @@ public import Mathlib.Topology.EMetricSpace.VariationOnFromTo
 @[expose] public section
 
 open MeasureTheory Set TopologicalSpace
+open scoped Topology
 
 variable {ι Ω E : Type*} {mΩ : MeasurableSpace Ω}
 
 variable [LinearOrder ι] [PseudoEMetricSpace E]
+
+/-- The variation of a family of functions over a countable set of points is measurable in the
+parameter. -/
+theorem measurable_eVariationOn_of_countable {m : MeasurableSpace Ω} {s : Set ι}
+    (hs : s.Countable) {X : ι → Ω → E} (hX : ∀ i ∈ s, StronglyMeasurable[m] (X i)) :
+    Measurable[m] fun ω ↦ eVariationOn (X · ω) s := by
+  simp only [eVariationOn_eq_iSup_fin]
+  refine Measurable.iSup fun n ↦ ?_
+  have : Countable {u : Fin (n + 1) → ι // Monotone u ∧ ∀ i, u i ∈ s} :=
+    (countable_pi fun _ ↦ hs).mono fun _ hu ↦ hu.2
+  refine Measurable.iSup fun p ↦ Finset.measurable_sum _ fun i _ ↦ ?_
+  exact (continuous_edist.comp_stronglyMeasurable
+    ((hX _ (p.2.2 i.succ)).prodMk (hX _ (p.2.2 i.castSucc)))).measurable
 
 /-- The variation process of `X` from the starting time `a`. -/
 noncomputable def variationProcess (X : ι → Ω → E) (a : ι) : ι → Ω → ℝ :=
@@ -65,6 +87,17 @@ variable [TopologicalSpace ι]
 
 section Separable
 
+/-- The variation of a family of functions that are continuous within `s` at every point of `s`,
+over the points of a set `s`, is measurable in the parameter. -/
+theorem measurable_eVariationOn_of_continuousWithinAt [OrderTopology ι]
+    [SeparableSpace ι] {s : Set ι} {X : ι → Ω → E}
+    (hX : ∀ i ∈ s, StronglyMeasurable[mΩ] (X i)) (hcont : ∀ ω, ContinuousOn (X · ω) s) :
+    Measurable[mΩ] fun ω ↦ eVariationOn (X · ω) s := by
+  obtain ⟨t, htc, ht⟩ := exists_countable_dense s
+  simp only [fun ω ↦ eVariationOn_eq_comp_val_of_dense ht (hcont ω)]
+  exact measurable_eVariationOn_of_countable (htc.image _) fun i hi ↦ hX i
+    (Subtype.coe_image_subset s t hi)
+
 /-- For `a ≤ t`, the value at time `t` of the variation process of a strongly adapted process with
 continuous paths is `𝓕 t`-measurable. -/
 theorem MeasureTheory.StronglyAdapted.measurable_variationProcess_of_continuous [OrderTopology ι]
@@ -87,6 +120,35 @@ theorem MeasureTheory.StronglyAdapted.adapted_variationProcess_of_continuous [Or
 end Separable
 
 section SecondCountableTopology
+
+/-- The variation of a family of right-continuous functions over the points of a set `s` is
+measurable in the parameter. -/
+theorem measurable_eVariationOn_of_continuousWithinAt_Ioi [OrderTopology ι]
+    [SecondCountableTopology ι] {s : Set ι} {X : ι → Ω → E}
+    (hX : ∀ i ∈ s, StronglyMeasurable[mΩ] (X i))
+    (hcont : ∀ ω, ∀ i ∈ s, ContinuousWithinAt (X · ω) (s ∩ Ioi i) i) :
+    Measurable[mΩ] fun ω ↦ eVariationOn (X · ω) s := by
+  obtain ⟨t, ht, htc, hts⟩ : ∃ t : Set s, Dense t ∧ t.Countable ∧ {x : s | 𝓝[>] x = ⊥} ⊆ t := by
+    obtain ⟨d, hdc, hdd⟩ := exists_countable_dense s
+    refine ⟨d ∪ {x : s | 𝓝[>] x = ⊥}, hdd.mono subset_union_left, hdc.union ?_, subset_union_right⟩
+    have hsub : {x : s | 𝓝[>] x = ⊥} ⊆ Subtype.val ⁻¹' {x ∈ s | 𝓝[s ∩ Ioi x] x = ⊥} :=
+      fun x hx ↦ ⟨x.2, (nhdsGT_subtype_eq_bot_iff x.2).1 hx⟩
+    exact ((countable_setOfPred_isolated_right_within).preimage Subtype.val_injective).mono hsub
+  simp only [fun ω ↦ eVariationOn_eq_comp_val_of_dense_Ioi ht hts (hcont ω)]
+  exact measurable_eVariationOn_of_countable (htc.image _) fun i hi ↦ hX i
+    (Subtype.coe_image_subset s t hi)
+
+/-- The variation of a family of left-continuous functions over the points of a set `s` is
+measurable in the parameter. -/
+theorem measurable_eVariationOn_of_continuousWithinAt_Iio [OrderTopology ι]
+    [SecondCountableTopology ι] {s : Set ι} {X : ι → Ω → E}
+    (hX : ∀ i ∈ s, StronglyMeasurable[mΩ] (X i))
+    (hcont : ∀ ω, ∀ i ∈ s, ContinuousWithinAt (X · ω) (s ∩ Iio i) i) :
+    Measurable[mΩ] fun ω ↦ eVariationOn (X · ω) s := by
+  have hdual : ∀ ω, eVariationOn (fun i ↦ X (OrderDual.ofDual i) ω) (OrderDual.ofDual ⁻¹' s)
+    = eVariationOn (X · ω) s := fun ω ↦ eVariationOn.comp_ofDual (X · ω) s
+  simpa [hdual] using measurable_eVariationOn_of_continuousWithinAt_Ioi
+    (s := OrderDual.ofDual ⁻¹' s) (X := fun i ↦ X (OrderDual.ofDual i)) hX hcont
 
 /-- For `a ≤ t`, the value at time `t` of the variation process of a strongly adapted process with
 right-continuous paths is `𝓕 t`-measurable. -/
