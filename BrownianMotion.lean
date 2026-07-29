@@ -8,6 +8,7 @@ public import BrownianMotion.Auxiliary.ContinuousBilinForm
 public import BrownianMotion.Auxiliary.ConvergenceInMeasure
 public import BrownianMotion.Auxiliary.DenseCountable
 public import BrownianMotion.Auxiliary.ENNReal
+public import BrownianMotion.Auxiliary.EVariationOn
 public import BrownianMotion.Auxiliary.Filtration
 public import BrownianMotion.Auxiliary.FiniteInf
 public import BrownianMotion.Auxiliary.HasGaussianLaw
@@ -81,5 +82,6 @@ public import BrownianMotion.StochasticIntegral.SimpleProcess
 public import BrownianMotion.StochasticIntegral.SquareIntegrable
 public import BrownianMotion.StochasticIntegral.StochasticInterval
 public import BrownianMotion.StochasticIntegral.UniformIntegrable
+public import BrownianMotion.StochasticIntegral.VariationProcess
 public import BrownianMotion.Verso.Brownian
 public import BrownianMotion.Verso.Processes
