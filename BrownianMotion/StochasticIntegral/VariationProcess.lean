@@ -47,9 +47,9 @@ variable [LinearOrder ι] [PseudoEMetricSpace E]
 
 /-- The variation of a family of functions over a countable set of points is measurable in the
 parameter. -/
-theorem measurable_eVariationOn_of_countable {m : MeasurableSpace Ω} {s : Set ι}
-    (hs : s.Countable) {X : ι → Ω → E} (hX : ∀ i ∈ s, StronglyMeasurable[m] (X i)) :
-    Measurable[m] fun ω ↦ eVariationOn (X · ω) s := by
+theorem measurable_eVariationOn_of_countable {s : Set ι}
+    (hs : s.Countable) {X : ι → Ω → E} (hX : ∀ i ∈ s, StronglyMeasurable[mΩ] (X i)) :
+    Measurable[mΩ] fun ω ↦ eVariationOn (X · ω) s := by
   simp only [eVariationOn_eq_iSup_fin]
   refine Measurable.iSup fun n ↦ ?_
   have : Countable {u : Fin (n + 1) → ι // Monotone u ∧ ∀ i, u i ∈ s} :=
