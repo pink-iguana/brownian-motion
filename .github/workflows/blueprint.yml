@@ -27,13 +27,8 @@ env:
   # A *release* rather than a run artifact on purpose: release assets of a public repository need no
   # authentication and never expire, while a cross-repository artifact download needs a PAT with
   # `actions:read` and is deleted after 90 days.
-  #
-  # Pinned rather than tracking the latest release, so the site generator does not move under the
-  # published output. Leave empty to take the most recent release instead. `referee` is a Lean
-  # executable that loads this project's environment, so its toolchain has to match
-  # `lean-toolchain` — v0.1.8 is built for v4.33.0-rc1. Bump this when the project's toolchain moves.
   REFEREE_REPO: LeanMachineLearning/exposition
-  REFEREE_VERSION: v0.1.8
+  REFEREE_VERSION: ""
   REFEREE_SITE_URL: https://remydegenne.github.io/brownian-motion/referee
 
   # Workers for the highlighting phase. Set explicitly rather than inheriting the CPU-count default:
