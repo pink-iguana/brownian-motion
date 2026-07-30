@@ -112,6 +112,7 @@ integral if it respects indistinguishability, addition, scalar multiplication,
 dominated converge, and elementary processes.
 -/
 def IsRiemannStieltjesExtension (I : SIntegral) (S : Domain) :=
+  ∀ X ∈ S, AEStronglyMeasurable (I X) P ∧
   IntegralElementary₁ P Y 𝓕 I S ∧
   IntegralElementary₂ P Y 𝓕 I S ∧
   IntegralAdd P I S ∧
@@ -120,18 +121,17 @@ def IsRiemannStieltjesExtension (I : SIntegral) (S : Domain) :=
   IntegralDCT P I S
 
 /--
-A domain `S` is consistent for `Y` if there can exists at most one
-extension of the Riemann-Stieltjes integral w.r.t `Y` on `S` (up to a.s. equality).
+An SIntegral `I` with domain `S` is *consistent* if any Riemann-Stieltjes extension
+with domain `S'` must almost surely agree with `I` on `S ∩ S'`.
 This condition ensures that `S` is not accidentally 'too large'.
 It can be shown that `S` is consistent if any function in `S` can be
 approximated pointwise by a sequence of elementary functions in a dominated way.
 -/
-def IsConsistentDomain (S : Domain) :=
-  (I₁ I₂ : SIntegral) →
-  IsRiemannStieltjesExtension P Y 𝓕 I₁ S →
-  IsRiemannStieltjesExtension P Y 𝓕 I₂ S →
-  (X : ι → Ω → ℝ) → (X ∈ S) →
-  ∀ᵐ ω ∂P, I₁ X ω = I₂ X ω
+def IsConsistent (I : SIntegral) (S : Domain) :=
+  (I' : SIntegral) → (S' : Domain) →
+  IsRiemannStieltjesExtension P Y 𝓕 I' S' →
+  (X : ι → Ω → ℝ) → (X ∈ S ∩ S') →
+  ∀ᵐ ω ∂P, I X ω = I' X ω
 
 /-- A `stochastic integral` against `Y` consists of a pre-integral `I`
 and a pre-domain `S`, such that `S` is a consistent domain and `I` is a
@@ -141,7 +141,7 @@ structure StochasticIntegral where
   I : SIntegral
   S : Domain
   is_extension : IsRiemannStieltjesExtension P Y 𝓕 I S
-  is_consistent : IsConsistentDomain P Y 𝓕 S
+  is_consistent : IsConsistent P Y 𝓕 I S
 
 end ProbabilityTheory
 
