@@ -36,7 +36,7 @@ lemma nullMeasurable_generateFrom {α β : Type*} {_ : MeasurableSpace α} {μ :
   simp only [Set.preimage_iUnion]
   exact fun t _ hft ↦ NullMeasurableSet.iUnion hft
 
-theorem nullMeasurable_of_Iio {α δ : Type*} [TopologicalSpace α] [MeasurableSpace α] [BorelSpace α]
+lemma nullMeasurable_of_Iio {α δ : Type*} [TopologicalSpace α] [MeasurableSpace α] [BorelSpace α]
     [LinearOrder α] [OrderTopology α] [SecondCountableTopology α]
     {mδ : MeasurableSpace δ} {μ : Measure δ}
     {f : δ → α} (hf : ∀ x, NullMeasurableSet (f ⁻¹' Set.Iio x) μ) : NullMeasurable f μ := by

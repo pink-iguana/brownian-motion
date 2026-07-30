@@ -402,7 +402,7 @@ lemma IsAESquareIntegrable.memLp_limitProcess (hX : IsAESquareIntegrable X 𝓕 
 
 variable [OrderTopology ι] [SecondCountableTopology ι]
 
-theorem IsSquareIntegrable.integral_iSup_norm_rpow_rpow_inv_le_limitProcess
+lemma IsSquareIntegrable.integral_iSup_norm_rpow_rpow_inv_le_limitProcess
     [CompleteSpace E] [IsFiniteMeasure P] (hX : IsSquareIntegrable X 𝓕 P) :
     (∫⁻ ω, (⨆ t, ‖X t ω‖ₑ) ^ 2 ∂P) ^ (1 / 2 : ℝ) ≤ 2 * eLpNorm (𝓕.limitProcess X P) 2 P := by
   simp_rw [← ENNReal.rpow_ofNat (n := 2)]
@@ -415,7 +415,7 @@ theorem IsSquareIntegrable.integral_iSup_norm_rpow_rpow_inv_le_limitProcess
       rfl
   all_goals simp
 
-theorem IsAESquareIntegrable.integral_iSup_norm_rpow_rpow_inv_le_limitProcess
+lemma IsAESquareIntegrable.integral_iSup_norm_rpow_rpow_inv_le_limitProcess
     [CompleteSpace E] [IsFiniteMeasure P] (hX : IsAESquareIntegrable X 𝓕 P) :
     (∫⁻ ω, (⨆ t, ‖X t ω‖ₑ) ^ (2 : ℝ) ∂P) ^ (1 / 2 : ℝ) ≤ 2 * eLpNorm (𝓕.limitProcess X P) 2 P := by
   grw [eLpNorm_congr_ae (𝓕.limitProcess_congr hX.choose_spec.2),

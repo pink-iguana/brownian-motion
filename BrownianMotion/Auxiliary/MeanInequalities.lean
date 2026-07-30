@@ -21,7 +21,7 @@ lemma rpow_lintegral_le {X : Type*} {mX : MeasurableSpace X} {μ : Measure X} {f
 
 namespace ENNReal
 
-theorem lintegral_Lp_finsum_le {α : Type*} [MeasurableSpace α] {μ : Measure α} {p : ℝ}
+lemma lintegral_Lp_finsum_le {α : Type*} [MeasurableSpace α] {μ : Measure α} {p : ℝ}
     {ι : Type*} {f : ι → α → ENNReal} {I : Finset ι}
     (hf : ∀ i ∈ I, AEMeasurable (f i) μ) (hp : 1 ≤ p) :
     (∫⁻ (a : α), (∑ i ∈ I, f i) a ^ p ∂μ) ^ (1 / p) ≤
@@ -36,7 +36,7 @@ theorem lintegral_Lp_finsum_le {α : Type*} [MeasurableSpace α] {μ : Measure �
     gcongr
     exact ih (fun j hj => hf j (by simp [hj]))
 
-theorem lintegral_Lp_finsum_le' {α : Type*} [MeasurableSpace α] {μ : Measure α} {p : ℝ}
+lemma lintegral_Lp_finsum_le' {α : Type*} [MeasurableSpace α] {μ : Measure α} {p : ℝ}
     {ι : Type*} {f : ι → α → ENNReal} {I : Finset ι}
     (hf : ∀ i ∈ I, AEMeasurable (f i) μ) (hp : 1 ≤ p) :
     (∫⁻ (a : α), (∑ i ∈ I, f i a) ^ p ∂μ) ^ (1 / p) ≤

@@ -47,7 +47,7 @@ variable [LinearOrder ι] [PseudoEMetricSpace E]
 
 /-- The variation of a family of functions over a countable set of points is measurable in the
 parameter. -/
-theorem measurable_eVariationOn_of_countable {s : Set ι}
+lemma measurable_eVariationOn_of_countable {s : Set ι}
     (hs : s.Countable) {X : ι → Ω → E} (hX : ∀ i ∈ s, StronglyMeasurable[mΩ] (X i)) :
     Measurable[mΩ] fun ω ↦ eVariationOn (X · ω) s := by
   simp only [eVariationOn_eq_iSup_fin]
@@ -64,19 +64,19 @@ noncomputable def variationProcess (X : ι → Ω → E) (a : ι) : ι → Ω �
 
 /-- For `a ≤ t`, the variation process at time `t` is the total variation of the path on `Icc a t`,
 converted to a real number. -/
-theorem variationProcess_eq_toReal_eVariationOn_Icc (X : ι → Ω → E) {a t : ι} (hat : a ≤ t)
+lemma variationProcess_eq_toReal_eVariationOn_Icc (X : ι → Ω → E) {a t : ι} (hat : a ≤ t)
     (ω : Ω) : variationProcess X a t ω = (eVariationOn (X · ω) (Icc a t)).toReal := by
   simp [variationProcess, variationOnFromTo, hat]
 
 /-- For `a ≤ t` the variation process is nonnegative. It can be negative for `t < a`, where it
 takes the signed value `-(eVariationOn (X · ω) (Icc t a)).toReal`. -/
-theorem variationProcess_nonneg (X : ι → Ω → E) {a t : ι} (hat : a ≤ t) (ω : Ω) :
+lemma variationProcess_nonneg (X : ι → Ω → E) {a t : ι} (hat : a ≤ t) (ω : Ω) :
     0 ≤ variationProcess X a t ω :=
   variationOnFromTo.nonneg_of_le _ _ hat
 
 /-- The variation process of a path of locally bounded variation is monotone in time. Monotonicity
 holds on all of `ι`, not just above the starting time `a`, since the variation is signed. -/
-theorem monotone_variationProcess {X : ι → Ω → E} {ω : Ω}
+lemma monotone_variationProcess {X : ι → Ω → E} {ω : Ω}
     (hX : LocallyBoundedVariationOn (X · ω) univ) (a : ι) :
     Monotone fun t ↦ variationProcess X a t ω :=
   fun _ _ hst ↦ variationOnFromTo.monotoneOn hX (mem_univ a) (mem_univ _) (mem_univ _) hst
@@ -89,7 +89,7 @@ section Separable
 
 /-- The variation of a family of functions that are continuous within `s` at every point of `s`,
 over the points of a set `s`, is measurable in the parameter. -/
-theorem measurable_eVariationOn_of_continuousWithinAt [OrderTopology ι]
+lemma measurable_eVariationOn_of_continuousWithinAt [OrderTopology ι]
     [SeparableSpace ι] {s : Set ι} {X : ι → Ω → E}
     (hX : ∀ i ∈ s, StronglyMeasurable[mΩ] (X i)) (hcont : ∀ ω, ContinuousOn (X · ω) s) :
     Measurable[mΩ] fun ω ↦ eVariationOn (X · ω) s := by
@@ -100,7 +100,7 @@ theorem measurable_eVariationOn_of_continuousWithinAt [OrderTopology ι]
 
 /-- For `a ≤ t`, the value at time `t` of the variation process of a strongly adapted process with
 continuous paths is `𝓕 t`-measurable. -/
-theorem MeasureTheory.StronglyAdapted.measurable_variationProcess_of_continuous [OrderTopology ι]
+lemma MeasureTheory.StronglyAdapted.measurable_variationProcess_of_continuous [OrderTopology ι]
     [SeparableSpace ι] {𝓕 : Filtration ι mΩ} {X : ι → Ω → E}
     (hX : StronglyAdapted 𝓕 X) {a t : ι} (hcont : ∀ ω, ContinuousOn (X · ω) (Ici a))
     (hat : a ≤ t) :
@@ -111,7 +111,7 @@ theorem MeasureTheory.StronglyAdapted.measurable_variationProcess_of_continuous 
 
 /-- If the index set has a bottom element, then the variation process of a strongly adapted process
 with continuous paths is adapted. -/
-theorem MeasureTheory.StronglyAdapted.adapted_variationProcess_of_continuous [OrderTopology ι]
+lemma MeasureTheory.StronglyAdapted.adapted_variationProcess_of_continuous [OrderTopology ι]
     [OrderBot ι] [SeparableSpace ι] {𝓕 : Filtration ι mΩ} {X : ι → Ω → E}
     (hX : StronglyAdapted 𝓕 X) (hcont : ∀ ω, Continuous (X · ω)) :
     Adapted 𝓕 (variationProcess X ⊥) :=
@@ -123,7 +123,7 @@ section SecondCountableTopology
 
 /-- The variation of a family of right-continuous functions over the points of a set `s` is
 measurable in the parameter. -/
-theorem measurable_eVariationOn_of_continuousWithinAt_Ioi [OrderTopology ι]
+lemma measurable_eVariationOn_of_continuousWithinAt_Ioi [OrderTopology ι]
     [SecondCountableTopology ι] {s : Set ι} {X : ι → Ω → E}
     (hX : ∀ i ∈ s, StronglyMeasurable[mΩ] (X i))
     (hcont : ∀ ω, ∀ i ∈ s, ContinuousWithinAt (X · ω) (s ∩ Ioi i) i) :
@@ -140,7 +140,7 @@ theorem measurable_eVariationOn_of_continuousWithinAt_Ioi [OrderTopology ι]
 
 /-- The variation of a family of left-continuous functions over the points of a set `s` is
 measurable in the parameter. -/
-theorem measurable_eVariationOn_of_continuousWithinAt_Iio [OrderTopology ι]
+lemma measurable_eVariationOn_of_continuousWithinAt_Iio [OrderTopology ι]
     [SecondCountableTopology ι] {s : Set ι} {X : ι → Ω → E}
     (hX : ∀ i ∈ s, StronglyMeasurable[mΩ] (X i))
     (hcont : ∀ ω, ∀ i ∈ s, ContinuousWithinAt (X · ω) (s ∩ Iio i) i) :
@@ -152,7 +152,7 @@ theorem measurable_eVariationOn_of_continuousWithinAt_Iio [OrderTopology ι]
 
 /-- For `a ≤ t`, the value at time `t` of the variation process of a strongly adapted process with
 right-continuous paths is `𝓕 t`-measurable. -/
-theorem MeasureTheory.StronglyAdapted.measurable_variationProcess_of_continuousWithinAt_Ioi
+lemma MeasureTheory.StronglyAdapted.measurable_variationProcess_of_continuousWithinAt_Ioi
     [OrderTopology ι] [SecondCountableTopology ι] {𝓕 : Filtration ι mΩ} {X : ι → Ω → E}
     (hX : StronglyAdapted 𝓕 X) (hcont : ∀ ω, ∀ i, ContinuousWithinAt (X · ω) (Ioi i) i)
     {a t : ι} (hat : a ≤ t) :
@@ -163,7 +163,7 @@ theorem MeasureTheory.StronglyAdapted.measurable_variationProcess_of_continuousW
 
 /-- If the index set has a bottom element, then the variation process of a strongly adapted process
 with right-continuous paths is adapted. -/
-theorem MeasureTheory.StronglyAdapted.adapted_variationProcess_of_continuousWithinAt_Ioi
+lemma MeasureTheory.StronglyAdapted.adapted_variationProcess_of_continuousWithinAt_Ioi
     [OrderTopology ι] [OrderBot ι] [SecondCountableTopology ι] {𝓕 : Filtration ι mΩ} {X : ι → Ω → E}
     (hX : StronglyAdapted 𝓕 X) (hcont : ∀ ω, ∀ i, ContinuousWithinAt (X · ω) (Ioi i) i) :
     Adapted 𝓕 (variationProcess X ⊥) :=
@@ -171,7 +171,7 @@ theorem MeasureTheory.StronglyAdapted.adapted_variationProcess_of_continuousWith
 
 /-- For `a ≤ t`, the value at time `t` of the variation process of a strongly adapted process with
 left-continuous paths is `𝓕 t`-measurable. -/
-theorem MeasureTheory.StronglyAdapted.measurable_variationProcess_of_continuousWithinAt_Iio
+lemma MeasureTheory.StronglyAdapted.measurable_variationProcess_of_continuousWithinAt_Iio
     [OrderTopology ι] [SecondCountableTopology ι] {𝓕 : Filtration ι mΩ} {X : ι → Ω → E}
     (hX : StronglyAdapted 𝓕 X) (hcont : ∀ ω, ∀ i, ContinuousWithinAt (X · ω) (Iio i) i)
     {a t : ι} (hat : a ≤ t) :
@@ -182,7 +182,7 @@ theorem MeasureTheory.StronglyAdapted.measurable_variationProcess_of_continuousW
 
 /-- If the index set has a bottom element, then the variation process of a strongly adapted process
 with right-continuous paths is adapted. -/
-theorem MeasureTheory.StronglyAdapted.adapted_variationProcess_of_continuousWithinAt_Iio
+lemma MeasureTheory.StronglyAdapted.adapted_variationProcess_of_continuousWithinAt_Iio
     [OrderTopology ι] [OrderBot ι] [SecondCountableTopology ι] {𝓕 : Filtration ι mΩ} {X : ι → Ω → E}
     (hX : StronglyAdapted 𝓕 X) (hcont : ∀ ω, ∀ i, ContinuousWithinAt (X · ω) (Iio i) i) :
     Adapted 𝓕 (variationProcess X ⊥) :=

@@ -82,7 +82,7 @@ lemma nhdsWithin_inter_Ioi_neBot {ι : Type*} [LinearOrder ι] [TopologicalSpace
 
 /-- The set of values taken by a right-continuous process with strongly measurable marginals
 is separable. -/
-theorem isSeparable_iUnion_range_of_stronglyMeasurable_of_isRightContinuous
+lemma isSeparable_iUnion_range_of_stronglyMeasurable_of_isRightContinuous
     {ι Ω E : Type*} [LinearOrder ι] [TopologicalSpace ι] [SecondCountableTopology ι]
     [OrderTopology ι] [MeasurableSpace Ω] [TopologicalSpace E] {X : ι → Ω → E}
     (hX : ∀ i, StronglyMeasurable (X i)) (hX_cont : ∀ ω, IsRightContinuous (X · ω)) :
@@ -111,7 +111,7 @@ variable {ι Ω E : Type*} [LinearOrder ι] [TopologicalSpace ι] [OrderTopology
 
 /-- A process whose paths are right-continuous and whose marginals `X i` are strongly measurable
 is strongly measurable as a map `Ω → (ι → E)` into the path space with the product topology. -/
-theorem stronglyMeasurable_path_of_isRightContinuous
+lemma stronglyMeasurable_path_of_isRightContinuous
     (hX : ∀ i, StronglyMeasurable (X i)) (hX_cont : ∀ ω, IsRightContinuous (X · ω)) :
     StronglyMeasurable (fun ω ↦ (X · ω)) := by
   rcases isEmpty_or_nonempty ι with hι | hι
@@ -208,7 +208,7 @@ theorem stronglyMeasurable_path_of_isRightContinuous
 
 /-- A strongly adapted process with right-continuous paths is strongly measurable as a path-valued
 random variable `Ω → (ι → E)`. -/
-theorem StronglyAdapted.stronglyMeasurable_path {𝓕 : Filtration ι mΩ}
+lemma StronglyAdapted.stronglyMeasurable_path {𝓕 : Filtration ι mΩ}
     (hX : StronglyAdapted 𝓕 X) (hX_cont : ∀ ω, IsRightContinuous (X · ω)) :
     StronglyMeasurable (fun ω ↦ (X · ω)) :=
   stronglyMeasurable_path_of_isRightContinuous (fun i ↦ (hX i).mono (𝓕.le i)) hX_cont
