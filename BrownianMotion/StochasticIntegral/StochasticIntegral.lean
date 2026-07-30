@@ -27,16 +27,17 @@ in this case the integral should commute with the limit.
 process should be integrable.
 
 In order to prevent nonuniqueness, we additionally impose a condition on the domain:
-* `IsConsistentDomain`: a domain `S` is consistent for `Y` if any two extensions of the
-  Riemann-Stieltjes integral with domain `S` must agree almost surely.
+* `IsConsistent`: the stochastic integral `I` should be canonical, i.e., any other Riemann-Stieltjes
+extension satisfying the above axioms should agree with `I` on the intersection of their domains.
 In practice, `IsConsistentDomain` can be shown whenever every element in `S` can be
 pointwise approximated by simple processes in a dominated way (in this case, uniqueness
 is easily shown using `IntegralDCT`).
 
 A `stochastic integral` is then given by the structure `StochasticIntegral`,
 guaranteeing that it satisfies all the above properties.
+
 Note that none of the definitions impose that the domain `S` should be maximal.
-As a consequence, it is possible to define stochastic integrals w.r.t `Y`.
+As a consequence, it is possible to define different stochastic integrals w.r.t `Y`.
 However, any two such integrals will necessarily agree (almost surely)
 on the intersection of their domains.
 -/
@@ -124,8 +125,6 @@ def IsRiemannStieltjesExtension (I : SIntegral) (S : Domain) :=
 An SIntegral `I` with domain `S` is *consistent* if any Riemann-Stieltjes extension
 with domain `S'` must almost surely agree with `I` on `S ∩ S'`.
 This condition ensures that `S` is not accidentally 'too large'.
-It can be shown that `S` is consistent if any function in `S` can be
-approximated pointwise by a sequence of elementary functions in a dominated way.
 -/
 def IsConsistent (I : SIntegral) (S : Domain) :=
   (I' : SIntegral) → (S' : Domain) →
