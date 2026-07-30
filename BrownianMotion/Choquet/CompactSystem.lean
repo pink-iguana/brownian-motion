@@ -52,11 +52,30 @@ lemma mem_infClosure_set_iff (s : Set α) :
     rw [hL_eq, ← Finset.inf_id_set_eq_sInter, Finset.inf'_eq_inf]
 
 lemma mem_supClosure_set_iff' (s : Set α) :
-    s ∈ supClosure S ↔ ∃ (t : Finset ℕ) (ht : t.Nonempty) (A : ℕ → Set α),
+    s ∈ supClosure S ↔ ∃ (t : Finset ℕ) (_ : t.Nonempty) (A : ℕ → Set α),
       (∀ n ∈ t, A n ∈ S) ∧ s = ⋃ n ∈ t, A n := by
   rw [mem_supClosure_set_iff]
   refine ⟨fun ⟨L, hL_nonempty, hL_eq, hL_subset⟩ ↦ ?_, fun ⟨t, ht_nonempty, A, hA, h_eq⟩ ↦ ?_⟩
-  · sorry
+  · classical
+    have hcard : L.toList.length = L.card := Finset.length_toList L
+    refine ⟨Finset.range L.card,
+      Finset.nonempty_range_iff.mpr (Finset.card_ne_zero.mpr hL_nonempty),
+      fun n ↦ if h : n < L.toList.length then L.toList[n] else ∅, ?_, ?_⟩
+    · intro n hn
+      rw [Finset.mem_range, ← hcard] at hn
+      simp only [dif_pos hn]
+      exact hL_subset (Finset.mem_coe.mpr (Finset.mem_toList.mp (List.getElem_mem hn)))
+    · ext x
+      rw [hL_eq]
+      simp only [Set.mem_sUnion, Finset.mem_coe, Set.mem_iUnion, Finset.mem_range, exists_prop]
+      constructor
+      · rintro ⟨u, hu, hxu⟩
+        obtain ⟨n, hn, rfl⟩ := List.mem_iff_getElem.mp (Finset.mem_toList.mpr hu)
+        exact ⟨n, hcard ▸ hn, by simpa only [dif_pos hn]⟩
+      · rintro ⟨n, hn, hxn⟩
+        rw [← hcard] at hn
+        rw [dif_pos hn] at hxn
+        exact ⟨_, Finset.mem_toList.mp (List.getElem_mem hn), hxn⟩
   · exact ⟨t.image A, by simpa, by simpa, by simpa⟩
 
 lemma mem_supClosure_insert_empty_iff (s : Set α) :
