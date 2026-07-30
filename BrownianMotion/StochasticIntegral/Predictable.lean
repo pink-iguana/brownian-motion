@@ -1,10 +1,11 @@
 /-
 Copyright (c) 2025 Kexing Ying. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Kexing Ying, Greg Neustroev
+Authors: Kexing Ying, Greg Neustroev, Shehzad Hathi
 -/
 module
 
+public import Mathlib.MeasureTheory.SetSemiring
 public import Mathlib.Probability.Process.Adapted
 public import Mathlib.Probability.Process.Filtration
 public import Mathlib.Probability.Process.Predictable
@@ -244,5 +245,142 @@ def predictableRectangles [OrderBot ι] (𝓕 : Filtration ι m) :
     Set (Set (ι × Ω)) :=
   {s | ∃ A, MeasurableSet[𝓕 ⊥] A ∧ s = {⊥} ×ˢ A} ∪
   {s | ∃ i j, i < j ∧ ∃ A, MeasurableSet[𝓕 i] A ∧ s = Set.Ioc i j ×ˢ A}
+
+variable {Ω ι : Type*} {m : MeasurableSpace Ω} [LinearOrder ι] [OrderBot ι]
+
+lemma singletonBot_prod_mem_predictableRectangles (𝓕 : Filtration ι m) {A : Set Ω}
+    (hA : MeasurableSet[𝓕 ⊥] A) :
+    {⊥} ×ˢ A ∈ 𝓕.predictableRectangles :=
+  Or.inl ⟨A, hA, rfl⟩
+
+lemma Ioc_prod_mem_predictableRectangles (𝓕 : Filtration ι m) (i j : ι) {A : Set Ω}
+    (hA : MeasurableSet[𝓕 i] A) :
+    Set.Ioc i j ×ˢ A ∈ 𝓕.predictableRectangles := by
+  by_cases hij : i < j
+  · exact Or.inr ⟨i, j, hij, A, hA, rfl⟩
+  · simpa [Set.Ioc_eq_empty hij] using
+      singletonBot_prod_mem_predictableRectangles 𝓕 (A := ∅)
+        (@MeasurableSet.empty Ω (𝓕 ⊥))
+
+omit [OrderBot ι] in
+private lemma disjoint_Ioc_prod_Ioc_prod {i j k l : ι} {A B : Set Ω} (hjk : j ≤ k) :
+    Disjoint (Set.Ioc i j ×ˢ A) (Set.Ioc k l ×ˢ B) := by
+  rw [Set.disjoint_prod]
+  left
+  exact Set.disjoint_left.mpr fun x hx hx' ↦ by grind
+
+private lemma disjoint_singletonBot_prod_Ioc_prod {i j : ι} {A B : Set Ω} :
+    Disjoint ({⊥} ×ˢ A) (Set.Ioc i j ×ˢ B) := by
+  rw [Set.disjoint_prod]
+  left
+  exact Set.disjoint_left.mpr fun _ hx hx' ↦ (not_lt_of_ge bot_le) (hx ▸ hx'.1)
+
+lemma isSetSemiring_predictableRectangles (𝓕 : Filtration ι m) :
+    IsSetSemiring 𝓕.predictableRectangles where
+  empty_mem := by
+    simpa using singletonBot_prod_mem_predictableRectangles 𝓕 (A := ∅)
+      (@MeasurableSet.empty Ω (𝓕 ⊥))
+  inter_mem := by
+    rintro _ (⟨A, hA, rfl⟩ | ⟨i, j, hij, A, hA, rfl⟩)
+      _ (⟨B, hB, rfl⟩ | ⟨i', j', hi'j', B, hB, rfl⟩)
+    · rw [Set.prod_inter_prod]
+      simpa using singletonBot_prod_mem_predictableRectangles 𝓕 (hA.inter hB)
+    · rw [disjoint_singletonBot_prod_Ioc_prod.inter_eq]
+      simpa using singletonBot_prod_mem_predictableRectangles 𝓕 (A := ∅)
+        (@MeasurableSet.empty Ω (𝓕 ⊥))
+    · rw [disjoint_singletonBot_prod_Ioc_prod.symm.inter_eq]
+      simpa using singletonBot_prod_mem_predictableRectangles 𝓕 (A := ∅)
+        (@MeasurableSet.empty Ω (𝓕 ⊥))
+    · rw [Set.prod_inter_prod, Set.Ioc_inter_Ioc]
+      exact Ioc_prod_mem_predictableRectangles 𝓕 _ _
+        ((𝓕.mono le_sup_left _ hA).inter (𝓕.mono le_sup_right _ hB))
+  sdiff_eq_sUnion' := by
+    classical
+    rintro _ (⟨A, hA, rfl⟩ | ⟨i, j, hij, A, hA, rfl⟩)
+      _ (⟨B, hB, rfl⟩ | ⟨i', j', hi'j', B, hB, rfl⟩)
+    · refine ⟨{{⊥} ×ˢ (A \ B)}, ?_, by simp, ?_⟩
+      · simpa using singletonBot_prod_mem_predictableRectangles 𝓕 (hA.diff hB)
+      · simp only [Finset.coe_singleton, Set.sUnion_singleton]
+        simp [Set.prod_sdiff_prod]
+    · refine ⟨{{⊥} ×ˢ A}, ?_, by simp, ?_⟩
+      · simpa using singletonBot_prod_mem_predictableRectangles 𝓕 hA
+      · simp only [Finset.coe_singleton, Set.sUnion_singleton]
+        exact sdiff_eq_self_iff_disjoint.mpr disjoint_singletonBot_prod_Ioc_prod.symm
+    · refine ⟨{Set.Ioc i j ×ˢ A}, ?_, by simp, ?_⟩
+      · simpa using Ioc_prod_mem_predictableRectangles 𝓕 i j hA
+      · simp only [Finset.coe_singleton, Set.sUnion_singleton]
+        exact sdiff_eq_self_iff_disjoint.mpr disjoint_singletonBot_prod_Ioc_prod
+    · rcases le_or_gt i' i with hi'i | hii'
+      · let R₁ := Set.Ioc i (min j j') ×ˢ (A \ B)
+        let R₂ := Set.Ioc (max i j') j ×ˢ A
+        refine ⟨{R₁, R₂}, ?_, ?_, ?_⟩
+        · rw [Finset.coe_insert, Finset.coe_singleton, Set.insert_subset_iff,
+            Set.singleton_subset_iff]
+          refine ⟨Ioc_prod_mem_predictableRectangles 𝓕 _ _
+            (hA.diff (𝓕.mono hi'i _ hB)), ?_⟩
+          exact Ioc_prod_mem_predictableRectangles 𝓕 _ _
+            (𝓕.mono (le_max_left i j') _ hA)
+        · rw [Finset.coe_insert, Finset.coe_singleton, Set.pairwiseDisjoint_insert]
+          refine ⟨Set.pairwiseDisjoint_singleton _ _, ?_⟩
+          intro R hR hne
+          rw [Set.mem_singleton_iff] at hR
+          subst R
+          exact disjoint_Ioc_prod_Ioc_prod
+            ((min_le_right j j').trans (le_max_right i j'))
+        · simp only [Finset.coe_insert, Finset.coe_singleton, Set.sUnion_insert,
+            Set.sUnion_singleton]
+          ext ⟨t, ω⟩
+          simp only [Set.mem_sdiff, Set.mem_prod, Set.mem_Ioc, Set.mem_union, R₁, R₂]
+          grind
+      · rcases le_or_gt j j' with hjj' | hj'j
+        · let R₁ := Set.Ioc i (min i' j) ×ˢ A
+          let R₂ := Set.Ioc (max i i') j ×ˢ (A \ B)
+          refine ⟨{R₁, R₂}, ?_, ?_, ?_⟩
+          · rw [Finset.coe_insert, Finset.coe_singleton, Set.insert_subset_iff,
+              Set.singleton_subset_iff]
+            refine ⟨Ioc_prod_mem_predictableRectangles 𝓕 _ _ hA, ?_⟩
+            exact Ioc_prod_mem_predictableRectangles 𝓕 _ _
+              ((𝓕.mono (le_max_left i i') _ hA).diff
+                (𝓕.mono (le_max_right i i') _ hB))
+          · rw [Finset.coe_insert, Finset.coe_singleton, Set.pairwiseDisjoint_insert]
+            refine ⟨Set.pairwiseDisjoint_singleton _ _, ?_⟩
+            intro R hR hne
+            rw [Set.mem_singleton_iff] at hR
+            subst R
+            exact disjoint_Ioc_prod_Ioc_prod
+              ((min_le_left i' j).trans (le_max_right i i'))
+          · simp only [Finset.coe_insert, Finset.coe_singleton, Set.sUnion_insert,
+              Set.sUnion_singleton]
+            ext ⟨t, ω⟩
+            simp only [Set.mem_sdiff, Set.mem_prod, Set.mem_Ioc, Set.mem_union, R₁, R₂]
+            grind
+        · let R₁ := Set.Ioc i i' ×ˢ A
+          let R₂ := Set.Ioc i' j' ×ˢ (A \ B)
+          let R₃ := Set.Ioc j' j ×ˢ A
+          refine ⟨{R₁, R₂, R₃}, ?_, ?_, ?_⟩
+          · rw [Finset.coe_insert, Finset.coe_insert, Finset.coe_singleton,
+              Set.insert_subset_iff, Set.insert_subset_iff, Set.singleton_subset_iff]
+            refine ⟨Ioc_prod_mem_predictableRectangles 𝓕 _ _ hA,
+              Ioc_prod_mem_predictableRectangles 𝓕 _ _
+                ((𝓕.mono hii'.le _ hA).diff hB), ?_⟩
+            exact Ioc_prod_mem_predictableRectangles 𝓕 _ _
+              (𝓕.mono (hii'.le.trans hi'j'.le) _ hA)
+          · rw [Finset.coe_insert, Finset.coe_insert, Finset.coe_singleton,
+              Set.pairwiseDisjoint_insert, Set.pairwiseDisjoint_insert]
+            refine ⟨⟨Set.pairwiseDisjoint_singleton _ _, ?_⟩, ?_⟩
+            · intro R hR hne
+              rw [Set.mem_singleton_iff] at hR
+              subst R
+              exact disjoint_Ioc_prod_Ioc_prod le_rfl
+            · intro R hR hne
+              rw [Set.mem_insert_iff, Set.mem_singleton_iff] at hR
+              rcases hR with rfl | rfl
+              · exact disjoint_Ioc_prod_Ioc_prod le_rfl
+              · exact disjoint_Ioc_prod_Ioc_prod hi'j'.le
+          · simp only [Finset.coe_insert, Finset.coe_singleton, Set.sUnion_insert,
+              Set.sUnion_singleton]
+            ext ⟨t, ω⟩
+            simp only [Set.mem_sdiff, Set.mem_prod, Set.mem_Ioc, Set.mem_union, R₁, R₂, R₃]
+            grind
 
 end MeasureTheory.Filtration

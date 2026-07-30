@@ -139,11 +139,13 @@ The class of \emph{predictable rectangles} on $T \times \Omega$ is
 
 \begin{lemma}\label{lem:predictableRectangles_isSetSemiring}
   \uses{def:predictableRectangles}
+  \leanok
+  \lean{MeasureTheory.Filtration.isSetSemiring_predictableRectangles}
 The class $\mathcal{R}_T$ of predictable rectangles
  is a semi-ring of sets.
 \end{lemma}
 
-\begin{proof}
+\begin{proof} \leanok
   Take two elements $A, B \in \mathcal{R}_T$~.
   If only one of $A, B$ is of the form $\{0\} \times F$,
   they are disjoint, so both the intersection and the difference
@@ -160,15 +162,25 @@ The class $\mathcal{R}_T$ of predictable rectangles
   =
   (s \vee s', t \wedge t'] \times (F \cap F').
   \]
-  Finally, the difference $A \setminus B$
-  is a disjoint union of at most three predictable rectangles:
+  Finally, the difference $A \setminus B$ is a disjoint union of at most three
+  predictable rectangles. If $s'\le s$, it is
   \[
-  (s, s \vee s'] \times F,
-  \qquad
-  (s \vee s', t \wedge t'] \times (F \setminus F'),
-  \qquad
-  (t \wedge t', t] \times F.
+    (s,t\wedge t']\times(F\setminus F')
+    \ \cup\ (s\vee t',t]\times F.
   \]
+  If $s<s'$ and $t\le t'$, it is
+  \[
+    (s,s'\wedge t]\times F
+    \ \cup\ (s\vee s',t]\times(F\setminus F').
+  \]
+  In the remaining case, $s<s'\le t'<t$, and it is
+  \[
+    (s,s']\times F
+    \ \cup\ (s',t']\times(F\setminus F')
+    \ \cup\ (t',t]\times F.
+  \]
+  Empty intervals are omitted. The required measurability follows by
+  monotonicity of the filtration.
 \end{proof}
 
 \begin{definition}[Elementary predictable set]\label{def:elementaryPredictableSet}
