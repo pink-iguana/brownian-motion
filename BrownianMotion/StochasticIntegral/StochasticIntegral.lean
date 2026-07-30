@@ -3,6 +3,38 @@ module
 public import Mathlib.Probability.Process.Adapted
 public import Mathlib.Probability.Process.Filtration
 
+/-!
+# Characterization of the stochastic integral.
+
+This file contains an axiomatic characterization of the stochastic integral
+against a process `Y : ι → Ω → ℝ`. Ideally, any reasonable definition of a
+stochastic integral should satisfy the following properties, packaged together
+into the definition `IsRiemannStieltjesExtension`.
+
+* `IntegralElementary`: the integral agrees with the Riemann-Stieltjes integral
+  on a very elementary set of processes.
+* `IntegralAdd`, `IntegralMul`: the integral should be linear.
+* `IntegralDCT`: if `X` is integrable, the the pointwise limit of any sequence
+of integrable processes which is dominated by `X` should again be integrable, and
+in this case the integral should commute with the limit.
+* `IntegralIndistinguishable`: a process which is indistinguishable from an integrable
+process should be integrable.
+
+In order to prevent nonuniqueness, we additionally impose a condition on the domain:
+* `IsConsistentDomain`: a domain `S` is consistent for `Y` if any two extensions of the
+  Riemann-Stieltjes integral with domain `S` must agree almost surely.
+In practice, `IsConsistentDomain` can be shown whenever every element in `S` can be
+pointwise approximated by simple processes in a dominated way (in this case, uniqueness
+is easily shown using `IntegralDCT`).
+
+A `stochastic integral` is then given by the structure `StochasticIntegral`,
+guaranteeing that it satisfies all the above properties.
+Note that none of the definitions impose that the domain `S` should be maximal.
+As a consequence, it is possible to define stochastic integrals w.r.t `Y`.
+However, any two such integrals will necessarily agree (almost surely)
+on the intersection of their domains.
+-/
+
 @[expose] public section
 
 namespace ProbabilityTheory
