@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2025 Kexing Ying. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Kexing Ying
+Authors: Kexing Ying, Greg Neustroev
 -/
 module
 
@@ -237,5 +237,12 @@ class IsComplete (𝓕 : Filtration ι m) (μ : Measure Ω := by volume_tac) whe
 instance {𝓕 : Filtration ι m} {μ : Measure Ω} [u : IsComplete 𝓕 μ] {i : ι} :
     (μ.trim <| 𝓕.le i).IsComplete :=
   ⟨fun _ hs ↦ IsComplete.measurableSet_of_null (measure_eq_zero_of_trim_eq_zero (𝓕.le i) hs) i⟩
+
+/-- The class of **predictable rectangles** associated to a filtration `𝓕` is the family of sets
+`(i, j] ×ˢ A` for `i < j` in `ι` and `A ∈ 𝓕 i`, together with `{⊥} ×ˢ A` for `A ∈ 𝓕 ⊥`. -/
+def predictableRectangles [OrderBot ι] (𝓕 : Filtration ι m) :
+    Set (Set (ι × Ω)) :=
+  {s | ∃ A, MeasurableSet[𝓕 ⊥] A ∧ s = {⊥} ×ˢ A} ∪
+  {s | ∃ i j, i < j ∧ ∃ A, MeasurableSet[𝓕 i] A ∧ s = Set.Ioc i j ×ˢ A}
 
 end MeasureTheory.Filtration
