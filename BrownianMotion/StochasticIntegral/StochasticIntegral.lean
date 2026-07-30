@@ -48,7 +48,7 @@ namespace ProbabilityTheory
 open ProbabilityTheory MeasureTheory Real Filtration Filter Topology
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} (P : Measure Ω)
-variable {ι : Type*} [LinearOrder ι]
+variable {ι : Type*} [LinearOrder ι] [OrderBot ι]
 variable (Y : ι → Ω → ℝ) (𝓕 : Filtration ι mΩ)
 
 /-- A domain is a subset of stochastic processes. -/
@@ -60,12 +60,22 @@ abbrev SIntegral := (X : ι → Ω → ℝ) → Ω → ℝ
 if for any `i ≤ j` and every `𝓕 i`-measurable random variable `X`, the elementary process
 constructed from `i`, `j`, and `X` lies in `S` and the value of `I` is the
 one we would expect. -/
-def IntegralElementary (I : SIntegral) (S : Domain) :=
+def IntegralElementary₁ (I : SIntegral) (S : Domain) :=
   (α β : ι) → (α ≤ β) → (X : Ω → ℝ) →
   (StronglyMeasurable[𝓕 α] X) →
   (fun i ω ↦ if (i ∈ Set.Ioc α β) then X ω else 0) ∈ S ∧
   ∀ᵐ ω ∂P, I (fun i ω ↦ if (i ∈ Set.Ioc α β) then X ω else 0) ω =
     X ω * (Y β ω - Y α ω)
+
+/-- An SIntegral `I` with domain `S` respects elementary processes w.r.t `Y`
+if for any `i ≤ j` and every `𝓕 i`-measurable random variable `X`, the elementary process
+constructed from `i`, `j`, and `X` lies in `S` and the value of `I` is the
+one we would expect. -/
+def IntegralElementary₂ (I : SIntegral) (S : Domain) :=
+  (α : ι) → (X : Ω → ℝ) → (StronglyMeasurable[𝓕 ⊥] X) →
+  (fun i ω ↦ if (i ∈ Set.Iic α) then X ω else 0) ∈ S ∧
+  ∀ᵐ ω ∂P, I (fun i ω ↦ if (i ∈ Set.Iic α) then X ω else 0) ω =
+    X ω * Y α ω - X ω * Y ⊥ ω
 
 /-- An SIntegral `I` with domain `S` respects addition if
 `S` is closed under addition and `I` commutes with addition. -/
@@ -102,7 +112,8 @@ integral if it respects indistinguishability, addition, scalar multiplication,
 dominated converge, and elementary processes.
 -/
 def IsRiemannStieltjesExtension (I : SIntegral) (S : Domain) :=
-  IntegralElementary P Y 𝓕 I S ∧
+  IntegralElementary₁ P Y 𝓕 I S ∧
+  IntegralElementary₂ P Y 𝓕 I S ∧
   IntegralAdd P I S ∧
   IntegralSMul P I S ∧
   IntegralIndistinguishable P I S ∧
