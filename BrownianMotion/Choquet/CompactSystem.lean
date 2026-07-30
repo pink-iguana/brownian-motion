@@ -139,7 +139,7 @@ lemma IsCompactSystem.equiv (e : 𝓚 ≃ 𝓚') {S : Set (Set 𝓚)} (hS : IsCo
   rw [Set.dissipate, ← Set.preimage_iInter₂] at hN
   refine ⟨N, by rw [Set.dissipate, h, hN]⟩
 
-theorem iInter_sigma_eq_empty_iff {𝓚 : ι → Type*} {β : Type*} (s : β → Set ι)
+lemma iInter_sigma_eq_empty_iff {𝓚 : ι → Type*} {β : Type*} (s : β → Set ι)
     (f : β → (i : ι) → Set (𝓚 i)) :
      ⋂ b, (s b).sigma (f b) = ∅ ↔ ∀ i ∈ ⋂ b, s b, ⋂ b, f b i = ∅ := by
   simp only [Set.eq_empty_iff_forall_notMem, Set.mem_iInter, Set.mem_sigma_iff]
@@ -147,7 +147,7 @@ theorem iInter_sigma_eq_empty_iff {𝓚 : ι → Type*} {β : Type*} (s : β →
     fun h ⟨i, x⟩ hx => h i (fun b => (hx b).1) x (fun b => (hx b).2)⟩
 
 /-- Variant with an additional condition `p b` (e.g. `b ≤ n` for `dissipate`). -/
-theorem iInter₂_sigma_eq_empty_iff {𝓚 : ι → Type*} {β : Type*} {p : β → Prop}
+lemma iInter₂_sigma_eq_empty_iff {𝓚 : ι → Type*} {β : Type*} {p : β → Prop}
     (s : β → Set ι) (f : β → (i : ι) → Set (𝓚 i)) :
     ⋂ (b) (_ : p b), (s b).sigma (f b) = ∅ ↔
       ∀ i ∈ ⋂ (b) (_ : p b), s b, ⋂ (b) (_ : p b), f b i = ∅ := by

@@ -82,7 +82,7 @@ def leftJumpSet [TopologicalSpace E] [LinearOrder ι] (f : ι → E) : Set ι :=
   {t | f.leftLim t ≠ f t}
 
 /-- For a càdlàg function, the left jump times are exactly its discontinuity points. -/
-theorem IsCadlag.leftJumpSet_eq_discontinuitySet [LinearOrder ι] [OrderTopology ι]
+lemma IsCadlag.leftJumpSet_eq_discontinuitySet [LinearOrder ι] [OrderTopology ι]
     [TopologicalSpace E] [T2Space E] {f : ι → E} (hf : IsCadlag f) :
     leftJumpSet f = {t | ¬ ContinuousAt f t} := by
   ext t
@@ -155,7 +155,7 @@ lemma IsCadlag.not_accPt_largeLeftJumpSet [LinearOrder ι] [OrderTopology ι] [U
       (SetRel.prodMk_mem_comp (hb.2 hx) (SetRel.symm _ (hb.2 ⟨hs.1.1, hs.1.2.trans_lt hx.2⟩))) hs.2
 
 /-- If `ι` is a compact space, then a càdlàg function has only finitely many large jumps. -/
-theorem IsCadlag.finite_largeLeftJumpSet [LinearOrder ι] [OrderTopology ι] [CompactSpace ι]
+lemma IsCadlag.finite_largeLeftJumpSet [LinearOrder ι] [OrderTopology ι] [CompactSpace ι]
     [UniformSpace E] {f : ι → E} (hf : IsCadlag f) {v : Set (E × E)} (hv : v ∈ uniformity E) :
     (largeLeftJumpSet f v).Finite := by
   by_contra!

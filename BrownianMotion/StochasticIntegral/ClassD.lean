@@ -841,7 +841,7 @@ lemma _root_.MeasureTheory.Submartingale.locally_classD
   exact .of_prop (hX.classDL hC hX_nonneg)
 
 /-- A nonnegative local submartingale is locally of class D. -/
-lemma IsLocalSubmartingale.locally_classD [NormedSpace ℝ E] [CompleteSpace E] [Lattice E]
+theorem IsLocalSubmartingale.locally_classD [NormedSpace ℝ E] [CompleteSpace E] [Lattice E]
     [HasSolidNorm E] [IsOrderedAddMonoid E] [IsOrderedModule ℝ E]
     [MeasureSpace E] [BorelSpace E] [SecondCountableTopology E]
     [Approximable 𝓕 P]

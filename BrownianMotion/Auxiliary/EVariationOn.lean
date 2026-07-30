@@ -43,7 +43,7 @@ variable [LinearOrder ι] [PseudoEMetricSpace E]
 
 /-- The variation over `s`, reindexed as a supremum over monotone tuples `Fin (n + 1) → ι` with
 values in `s`. -/
-theorem eVariationOn_eq_iSup_fin {s : Set ι} (X : ι → E) :
+lemma eVariationOn_eq_iSup_fin {s : Set ι} (X : ι → E) :
     eVariationOn X s = ⨆ (n : ℕ) (p : {u : Fin (n + 1) → ι // Monotone u ∧ ∀ i, u i ∈ s}),
       ∑ i : Fin n, edist (X (p.1 i.succ)) (X (p.1 i.castSucc)) := by
   refine le_antisymm (iSup_le fun ⟨n, u, hu, hus⟩ ↦ ?_)
@@ -67,7 +67,7 @@ section Separable
 
 /-- The variation of a function that is continuous within `s` at every point of `s` can be
 computed using only points of a dense subset `t` of `s`. -/
-theorem eVariationOn_eq_comp_val_of_dense [OrderTopology ι] {s : Set ι} {t : Set s}
+lemma eVariationOn_eq_comp_val_of_dense [OrderTopology ι] {s : Set ι} {t : Set s}
     (ht : Dense t) {f : ι → E} (hf : ContinuousOn f s) :
     eVariationOn f s = eVariationOn f t := by
   refine le_antisymm ?_ (eVariationOn.mono f (Subtype.coe_image_subset s t))
@@ -108,7 +108,7 @@ section SecondCountableTopology
 
 /-- A point of a subset `s` is isolated on the right in the subspace `↥s` exactly when it is
 isolated on the right within `s`. -/
-theorem nhdsGT_subtype_eq_bot_iff {s : Set ι} {x : ι} (hx : x ∈ s) :
+lemma nhdsGT_subtype_eq_bot_iff {s : Set ι} {x : ι} (hx : x ∈ s) :
     𝓝[>] (⟨x, hx⟩ : s) = ⊥ ↔ 𝓝[s ∩ Ioi x] x = ⊥ := by
   have : ((↑) : s → ι) ⁻¹' Ioi x = Ioi ⟨x, hx⟩ := rfl
   rw [← this, nhdsWithin_subtype_eq_bot_iff, nhdsWithin, inf_assoc, inf_principal, inter_comm,
@@ -117,7 +117,7 @@ theorem nhdsGT_subtype_eq_bot_iff {s : Set ι} {x : ι} (hx : x ∈ s) :
 /-- The variation of a function that is right-continuous within `s` at every point of `s` can be
 computed using only points of a dense subset `t` of `s`, provided `t` contains every point of `s`
 that is isolated on the right. -/
-theorem eVariationOn_eq_comp_val_of_dense_Ioi [OrderTopology ι] {s : Set ι} {t : Set s}
+lemma eVariationOn_eq_comp_val_of_dense_Ioi [OrderTopology ι] {s : Set ι} {t : Set s}
     (ht : Dense t) (hts : {x : s | 𝓝[>] x = ⊥} ⊆ t) {f : ι → E}
     (hf : ∀ x ∈ s, ContinuousWithinAt f (s ∩ Ioi x) x) :
     eVariationOn f s = eVariationOn f t := by
@@ -167,7 +167,7 @@ theorem eVariationOn_eq_comp_val_of_dense_Ioi [OrderTopology ι] {s : Set ι} {t
 /-- The variation of a function that is left-continuous within `s` at every point of `s` can be
 computed using only points of a dense subset `t` of `s`, provided `t` contains every point of `s`
 that is isolated on the left. -/
-theorem eVariationOn_eq_comp_val_of_dense_Iio [OrderTopology ι] {s : Set ι} {t : Set s}
+lemma eVariationOn_eq_comp_val_of_dense_Iio [OrderTopology ι] {s : Set ι} {t : Set s}
     (ht : Dense t) (hts : {x : s | 𝓝[<] x = ⊥} ⊆ t) {f : ι → E}
     (hf : ∀ x ∈ s, ContinuousWithinAt f (s ∩ Iio x) x) :
     eVariationOn f s = eVariationOn f t := by

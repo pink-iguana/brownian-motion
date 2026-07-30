@@ -237,7 +237,7 @@ lemma maximal_ineq_countable_ennreal (hsub : Submartingale Y 𝓕 P) (hnonneg : 
 -- TODO: add this to Mathlib
 attribute [aesop (rule_sets := [finiteness]) safe apply] ENNReal.nnreal_smul_ne_top
 
-theorem _root_.ENNReal.ofReal_smul {a : ℝ≥0} {b : ℝ} :
+lemma _root_.ENNReal.ofReal_smul {a : ℝ≥0} {b : ℝ} :
     ENNReal.ofReal (a • b) = a • ENNReal.ofReal b := by
   erw [ENNReal.ofReal_mul (by simp)]
   simp
@@ -292,7 +292,7 @@ lemma _root_.MeasureTheory.Submartingale.iSup_ofReal_ne_top (hsub : Submartingal
 
 /-- Doob's maximal inequality implies that the supremum process of a nonnegative submartingale is
 a.s. bounded. -/
-theorem _root_.MeasureTheory.Submartingale.ae_bddAbove_Iic (hsub : Submartingale Y 𝓕 P)
+lemma _root_.MeasureTheory.Submartingale.ae_bddAbove_Iic (hsub : Submartingale Y 𝓕 P)
     (hnonneg : 0 ≤ Y) (n : ι) :
     ∀ᵐ ω ∂P, BddAbove ((fun i ↦ Y i ω) '' Set.Iic n) := by
   filter_upwards [hsub.iSup_ofReal_ne_top hnonneg n] with ω h
@@ -319,7 +319,7 @@ theorem maximal_ineq_countable (hsub : Submartingale Y 𝓕 P) (hnonneg : 0 ≤ 
   rw [measureReal_congr this, setIntegral_congr_set this]
   exact maximal_ineq_countable_ennreal hsub hnonneg ε n
 
-theorem maximal_ineq_norm_countable (hmar : Martingale X 𝓕 P) (ε : ℝ≥0) (n : ι) :
+lemma maximal_ineq_norm_countable (hmar : Martingale X 𝓕 P) (ε : ℝ≥0) (n : ι) :
     ε • P.real {ω | (ε : ℝ) ≤ ⨆ i : Set.Iic n, ‖X i ω‖} ≤
       ∫ ω in {ω | (ε : ℝ) ≤ ⨆ i : Set.Iic n, ‖X i ω‖}, ‖X n ω‖ ∂P :=
   maximal_ineq_countable hmar.submartingale_norm (fun _ _ ↦ norm_nonneg _) ε n
@@ -327,13 +327,13 @@ theorem maximal_ineq_norm_countable (hmar : Martingale X 𝓕 P) (ε : ℝ≥0) 
 end Countable
 
 @[simp]
-theorem preimage_iSup {ι β : Type*} [CompleteLinearOrder β] (f : ι → Ω → β)
+lemma preimage_iSup {ι β : Type*} [CompleteLinearOrder β] (f : ι → Ω → β)
     (b : β) : (⨆ i, f i) ⁻¹' (Set.Ioi b) = ⋃ i, f i ⁻¹' (Set.Ioi b) := by
   ext; simp [lt_iSup_iff]
 
 variable [TopologicalSpace ι] [OrderTopology ι] [SecondCountableTopology ι]
 
-theorem measurable_iSup_of_rightContinuous {β : Type*} {f : ι → Ω → β}
+lemma measurable_iSup_of_rightContinuous {β : Type*} {f : ι → Ω → β}
     [TopologicalSpace β] [MeasurableSpace β] [BorelSpace β] [CompleteLinearOrder β]
     [OrderTopology β] [SecondCountableTopology β] (hX_cont : ∀ ω, IsRightContinuous (f · ω))
     (hm : ∀ t, Measurable (f t)) :
@@ -365,7 +365,7 @@ theorem measurable_iSup_of_rightContinuous {β : Type*} {f : ι → Ω → β}
     obtain ⟨k, hk⟩ := hS.exists_mem_open isOpen_Ioo this
     exact Set.mem_biUnion hk.1 (hu.2 hk.2)
 
-theorem maximal_ineq_ennreal (hsub : Submartingale Y 𝓕 P) (hnonneg : 0 ≤ Y) (ε : ℝ≥0) (n : ι)
+lemma maximal_ineq_ennreal (hsub : Submartingale Y 𝓕 P) (hnonneg : 0 ≤ Y) (ε : ℝ≥0) (n : ι)
     (hY_cont : ∀ ω, IsRightContinuous (Y · ω)) :
     ε * P.real {ω | (ε : ℝ≥0∞) ≤ ⨆ i : Set.Iic n, ENNReal.ofReal (Y i ω)} ≤
       ∫ ω in {ω | (ε : ℝ≥0∞) ≤ ⨆ i : Set.Iic n, ENNReal.ofReal (Y i ω)}, Y n ω ∂P := by
@@ -470,7 +470,7 @@ lemma _root_.MeasureTheory.Submartingale.rightCont_iSup_ofReal_ne_top (hsub : Su
   · exact fun r ↦ (measurableSet_le measurable_const hmY).nullMeasurableSet
   · use 0; finiteness
 
-theorem maximal_ineq_nonneg (hsub : Submartingale Y 𝓕 P) (hnonneg : 0 ≤ Y) (ε : ℝ≥0) (n : ι)
+lemma maximal_ineq_nonneg (hsub : Submartingale Y 𝓕 P) (hnonneg : 0 ≤ Y) (ε : ℝ≥0) (n : ι)
     (hY_cont : ∀ ω, IsRightContinuous (Y · ω)) :
     ε * P.real {ω | (ε : ℝ) ≤ ⨆ i : Set.Iic n, Y i ω} ≤
       ∫ ω in {ω | (ε : ℝ) ≤ ⨆ i : Set.Iic n, Y i ω}, Y n ω ∂P := by
@@ -498,7 +498,7 @@ theorem maximal_ineq (hsub : Submartingale Y 𝓕 P) (hnonneg : 0 ≤ Y) (ε : �
   · exact (mul_nonpos_of_nonpos_of_nonneg hε.le measureReal_nonneg).trans
       (integral_nonneg (hnonneg n))
 
-theorem maximal_ineq_norm (hmar : Martingale X 𝓕 P) (ε : ℝ) (n : ι)
+lemma maximal_ineq_norm (hmar : Martingale X 𝓕 P) (ε : ℝ) (n : ι)
     (hX_cont : ∀ ω, IsRightContinuous (X · ω)) :
     ε • P.real {ω | ε ≤ ⨆ i : Set.Iic n, ‖X i ω‖} ≤
       ∫ ω in {ω | ε ≤ ⨆ i : Set.Iic n, ‖X i ω‖}, ‖X n ω‖ ∂P := by

@@ -436,7 +436,7 @@ variable {ι Ω E : Type*} [LinearOrder ι] {mΩ : MeasurableSpace Ω} {P : Meas
   [NormedSpace ℝ E] [TopologicalSpace ι]
 
 /-- A càdlàg uniformly integrable martingale converges. -/
-lemma Martingale.ae_tendsto_limitProcess
+theorem Martingale.ae_tendsto_limitProcess
     (hX1 : Martingale X 𝓕 P) (hX2 : UniformIntegrable X 1 P)
     (hX3 : ∀ ω, IsRightContinuous (X · ω)) :
     ∀ᵐ ω ∂P, Tendsto (X · ω) atTop (𝓝 (𝓕.limitProcess X P ω)) := by
@@ -467,14 +467,14 @@ lemma Martingale.limitProcess_sub [Nonempty ι]
     hY1.ae_tendsto_limitProcess hY2 hY3] with ω h1 h2 using h1.sub h2
 
 /-- For a càdlàg uniformly integrable martingale, `P[X ∞ | 𝓕 t] = X t`. -/
-lemma Martingale.condExp_limitProcess_ae_eq
+theorem Martingale.condExp_limitProcess_ae_eq
     (hX1 : Martingale X 𝓕 P) (hX2 : UniformIntegrable X 1 P)
     (hX3 : ∀ ω, IsRightContinuous (X · ω)) (t : ι) :
     P[𝓕.limitProcess X P | 𝓕 t] =ᵐ[P] X t := by
   sorry
 
 /-- For a càdlàg uniformly integrable martingale and a stopping time `τ`, `P[X ∞ | 𝓕 τ] = X τ`. -/
-lemma Martingale.condExp_limitProcess_ae_eq'
+theorem Martingale.condExp_limitProcess_ae_eq'
     (hX1 : Martingale X 𝓕 P) (hX2 : UniformIntegrable X 1 P)
     (hX3 : ∀ ω, IsRightContinuous (X · ω)) (hτ : IsStoppingTime 𝓕 τ) :
     P[𝓕.limitProcess X P | hτ.measurableSpace] =ᵐ[P] 𝓕.stoppedValue' X τ P := by

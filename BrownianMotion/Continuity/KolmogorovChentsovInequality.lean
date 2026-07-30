@@ -20,7 +20,7 @@ open scoped ENNReal NNReal Topology Asymptotics
 
 section aux
 
-protected theorem Asymptotics.IsEquivalent.rpow_of_nonneg {α : Type*}
+protected lemma Asymptotics.IsEquivalent.rpow_of_nonneg {α : Type*}
     {t u : α → ℝ} (hu : 0 ≤ u) {l : Filter α} (h : t ~[l] u) {r : ℝ} :
     t ^ r ~[l] u ^ r := by
   obtain ⟨φ, hφ, htφu⟩ := IsEquivalent.exists_eq_mul h
@@ -228,7 +228,7 @@ lemma constL_lt_top (hT : Metric.ediam U < ∞)
   refine (Asymptotics.IsEquivalent.add_const_of_norm_tendsto_atTop .refl ?_).symm
   exact Tendsto.comp tendsto_norm_atTop_atTop (tendsto_natCast_atTop_iff.mpr tendsto_id)
 
-theorem finite_kolmogorov_chentsov
+lemma finite_kolmogorov_chentsov
     (hT : HasBoundedCoveringNumber U c d)
     (hX : IsAEKolmogorovProcess X P p q M)
     (hd_pos : 0 < d) (hdq_lt : d < q)

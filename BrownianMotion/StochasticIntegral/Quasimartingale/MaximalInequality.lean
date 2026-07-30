@@ -650,7 +650,7 @@ lemma mul_measureReal_exists_lt_le [IsFiniteMeasure μ]
 
 /-- **Maximal inequality**: the probability that `|X|` exceeds `lam` somewhere on a finite set
 `F ⊆ Iic t` is at most `K / lam`, with `K` independent of `F`. -/
-lemma measureReal_exists_abs_lt_le [OrderBot ι] [IsFiniteMeasure μ]
+theorem measureReal_exists_abs_lt_le [OrderBot ι] [IsFiniteMeasure μ]
     (hX : StronglyAdapted 𝓕 X) (hXint : ∀ s, Integrable (X s) μ) {C : ℝ}
     (hC : ∀ S : ElementaryPredictableSet 𝓕, μ[(S.indicator (1 : ℝ) ● X) t] ≤ C)
     (hlam : 0 < lam) (hF : ∀ s ∈ F, s ≤ t) :
