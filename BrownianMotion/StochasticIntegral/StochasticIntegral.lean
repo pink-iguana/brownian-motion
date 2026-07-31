@@ -77,8 +77,8 @@ structure IsRiemannStieltjesExtension (I : SIntegral) (S : Domain) : Prop where
     X₂ ∈ S ∧ I X₁ =ᵐ[P] I X₂
   /-- The domain is closed under dominated convergence, and in this case the integral
   commutes with the limit. -/
-  integral_dct (X : ℕ → ι → Ω → ℝ) X_dom X_lim
-      (h₁ : ∀ n, X n ∈ S) (h₂ : X_dom ∈ S) (h_dom : ∀ n i ω, |X n i ω| ≤ |X_dom i ω|)
+  integral_dct (X : ℕ → ι → Ω → ℝ) X_dom X_lim (h₁ : ∀ n, X n ∈ S) (h₂ : X_dom ∈ S)
+      (h_dom : ∀ n i ω, |X n i ω| ≤ |X_dom i ω|)
       (h_lim : ∀ i ω, Tendsto (X · i ω) atTop (𝓝 (X_lim i ω))) :
     X_lim ∈ S ∧ TendstoInMeasure P (fun n ↦ I (X n)) atTop (I X_lim)
 
