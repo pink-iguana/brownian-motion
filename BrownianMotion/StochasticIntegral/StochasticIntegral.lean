@@ -14,7 +14,10 @@ public import BrownianMotion.Auxiliary.Indistinguishable
 # Characterization of the stochastic integral.
 
 This file contains an axiomatic characterization of the stochastic integral
-against a process `Y : ι → Ω → ℝ`. We ask for the following properties, which we expect
+against a process `Y : ι → Ω → ℝ`. The integral is defined as a map from `ι → Ω → ℝ`
+to `Ω → ℝ`, meaning that we are evaluating the integral at some fixed, terminal time.
+
+We ask for the following properties, which we expect
 any good stochastic integral `I` to have:
 * The integral agrees with the Riemann-Stieltjes integral for elementary processes.
 * Linearity for the integral and its domain.
