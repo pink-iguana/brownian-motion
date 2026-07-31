@@ -20,13 +20,13 @@ any good stochastic integral `I` to have:
 * Linearity for the integral and its domain.
 * The integral and its domain respect indistinguishability.
 * Dominated convergence: if a process `X` is integrable, then any pointwise limit of a
-sequence of integrable processes which is dominated by `X` should again be integrable.
+  sequence of integrable processes which is dominated by `X` should again be integrable.
 
 The properties above are encoded in the predicate `IsRiemannStieltjesExtension`.
 However, this predicate does not ensure that the integral is canonical or unique.
 To get a true stochastic integral `I`, we additionally impose the following.
 * Any extension of the Riemann-Stieltjes integral must agree with `I` on
-the intersection of their domains.
+  the intersection of their domains.
 
 This additional condition is encoded in `IsStochasticIntegral` which extends
 `IsRiemannStieltjesExtension`.
