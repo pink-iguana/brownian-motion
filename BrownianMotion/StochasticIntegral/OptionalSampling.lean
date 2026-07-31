@@ -25,7 +25,7 @@ variable {ι Ω E : Type*} [LinearOrder ι] [TopologicalSpace ι] [OrderTopology
   {mΩ : MeasurableSpace Ω} {𝓕 : Filtration ι mΩ} {μ : Measure Ω} [IsFiniteMeasure μ]
   {X : ι → Ω → E} {τ σ : Ω → WithTop ι} {n : ι}
 
-theorem condExp_stoppedValue_stopping_time_ae_eq_restrict_le_of_countable_range
+lemma condExp_stoppedValue_stopping_time_ae_eq_restrict_le_of_countable_range
     (h : Martingale X 𝓕 μ) (hRC : ∀ ω, IsRightContinuous (X · ω)) {i : ι} (hτ_le : ∀ x, τ x ≤ i)
     (hτ : IsStoppingTime 𝓕 τ) (hσ : IsStoppingTime 𝓕 σ)
     (hτ_countable_range : (Set.range τ).Countable) :
@@ -57,7 +57,7 @@ theorem condExp_stoppedValue_stopping_time_ae_eq_restrict_le_of_countable_range
       simp only [hx, Set.indicator_of_notMem, not_false_iff]
   exact condExp_of_aestronglyMeasurable' hσ.measurableSpace_le h_meas h_int
 
-theorem stoppedValue_min_ae_eq_condExp_of_countable_range
+lemma stoppedValue_min_ae_eq_condExp_of_countable_range
     (h : Martingale X 𝓕 μ) (hRC : ∀ ω, IsRightContinuous (X · ω))
     (hτ : IsStoppingTime 𝓕 τ) (hσ : IsStoppingTime 𝓕 σ) {n : ι} (hτ_le : ∀ x, τ x ≤ n)
     (hτ_countable_range : (Set.range τ).Countable) (hσ_countable_range : (Set.range σ).Countable) :
@@ -157,7 +157,7 @@ theorem stoppedValue_min_ae_eq_condExp'
   stoppedValue_min_ae_eq_condExp_of_discreteApproxSequence h hRC hτ hσ hτ_le
     (hτ.discreteApproxSequence μ) (hσ.discreteApproxSequence μ)
 
-theorem stoppedValue_ae_eq_condExp_of_le_const'
+lemma stoppedValue_ae_eq_condExp_of_le_const'
     [Approximable 𝓕 μ] (h : Martingale X 𝓕 μ) (hRC : ∀ ω, IsRightContinuous (X · ω))
     (hτ : IsStoppingTime 𝓕 τ) (hτ_le : ∀ x, τ x ≤ n) :
     stoppedValue X τ =ᵐ[μ] μ[X n|hτ.measurableSpace] := by
