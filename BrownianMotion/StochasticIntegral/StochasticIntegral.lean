@@ -57,38 +57,37 @@ if it agrees with Riemann-Stieltjes on elementary processes and respects lineari
 indistinguishability, and dominated convergence. -/
 structure IsRiemannStieltjesExtension (I : SIntegral) (S : Domain) : Prop where
   /-- The stochastic integral is measurable. -/
-  measurable : (X : ι → Ω → ℝ) → (X ∈ S) → AEStronglyMeasurable (I X) P
+  measurable X (h : X ∈ S) : AEStronglyMeasurable (I X) P
   /-- Elementary functions are in the domain and the value of the integral is the
   expected one. -/
-  elementary_ioc : (i j : ι) → (i ≤ j) → (X : @SimpleFunc Ω (𝓕 i) ℝ) →
+  elementary_ioc i j (h : i ≤ j) (X : @SimpleFunc Ω (𝓕 i) ℝ) :
     (fun k ω ↦ if (k ∈ Set.Ioc i j) then X ω else 0) ∈ S ∧
     I (fun k ω ↦ if (k ∈ Set.Ioc i j) then X ω else 0) =ᵐ[P] X * (Y j - Y i)
-  elementary_iic : (i : ι) → (X : @SimpleFunc Ω (𝓕 ⊥) ℝ) →
+  elementary_iic i (X : @SimpleFunc Ω (𝓕 ⊥) ℝ) :
     (fun j ω ↦ if (j ∈ Set.Iic i) then X ω else 0) ∈ S ∧
     I (fun j ω ↦ if (j ∈ Set.Iic i) then X ω else 0) =ᵐ[P] X * (Y i - Y ⊥)
   /-- The integral and the domain respect addition. -/
-  integral_add : (X₁ X₂ : ι → Ω → ℝ) → (X₁ ∈ S) → (X₂ ∈ S) →
+  integral_add X₁ X₂ (h₁ : X₁ ∈ S) (h₂ : X₂ ∈ S) :
     X₁ + X₂ ∈ S ∧ I (X₁ + X₂) =ᵐ[P] I X₁ + I X₂
   /-- The integral and the domain respect scalar multiplication. -/
-  integral_smul : (X : ι → Ω → ℝ) → (X ∈ S) → (α : ℝ) →
+  integral_smul X (α : ℝ) (h : X ∈ S) :
     α • X ∈ S ∧ I (α • X) =ᵐ[P] α • I X
   /-- The integral and its domain respect indistinguishability. -/
-  integral_indistinguishable : (X₁ X₂ : ι → Ω → ℝ) → (X₁ ∈ S) →
-    (X₁ ≡ᵐ[P] X₂) → X₂ ∈ S ∧ I X₁ =ᵐ[P] I X₂
+  integral_indistinguishable X₁ X₂ (h₁ : X₁ ∈ S) (h₂ : X₁ ≡ᵐ[P] X₂) :
+    X₂ ∈ S ∧ I X₁ =ᵐ[P] I X₂
   /-- The domain is closed under dominated convergence, and in this case the integral
   commutes with the limit. -/
-  integral_dct : (X : ℕ → ι → Ω → ℝ) → (X_dom X_lim : ι → Ω → ℝ) →
-    (∀ n, X n ∈ S) → (X_dom ∈ S) → (∀ n i ω, |X n i ω| ≤ |X_dom i ω|) →
-    (∀ i ω, Tendsto (X · i ω) atTop (𝓝 (X_lim i ω))) →
-    (X_lim ∈ S) ∧ TendstoInMeasure P (fun n ↦ I (X n)) atTop (I X_lim)
+  integral_dct (X : ℕ → ι → Ω → ℝ) X_dom X_lim
+      (h₁ : ∀ n, X n ∈ S) (h₂ : X_dom ∈ S) (h_dom : ∀ n i ω, |X n i ω| ≤ |X_dom i ω|)
+      (h_lim : ∀ i ω, Tendsto (X · i ω) atTop (𝓝 (X_lim i ω))) :
+    X_lim ∈ S ∧ TendstoInMeasure P (fun n ↦ I (X n)) atTop (I X_lim)
 
 /-- An SIntegral `I` with domain `S` is a *stochastic integral* if it is an extension of the
 Riemann-Stieltjes integral and it agrees with any other extension on the intersection
 of their domains. -/
-structure IsStochasticIntegral (I : SIntegral) (S : Domain) extends
-    IsRiemannStieltjesExtension P Y 𝓕 I S where
-  consistent : (I' : SIntegral) → (S' : Domain) → IsRiemannStieltjesExtension P Y 𝓕 I' S' →
-    (X : ι → Ω → ℝ) → (X ∈ S ∩ S') → I X =ᵐ[P] I' X
+structure IsStochasticIntegral I S extends IsRiemannStieltjesExtension P Y 𝓕 I S where
+  consistent I' S' (h : IsRiemannStieltjesExtension P Y 𝓕 I' S') X (hX : X ∈ S ∩ S') :
+    I X =ᵐ[P] I' X
 
 end ProbabilityTheory
 
