@@ -135,7 +135,7 @@ lemma IsStoppingTime.measurableSet_lt_top (hτ : IsStoppingTime 𝓕 τ) [Topolo
 `τ_A` is accessible while `τ_Aᶜ` is inaccessible, where `τ_A` is the stopping time which
 coincides with `τ` over `A` and is infinite elsewhere. -/
 theorem IsStoppingTime.decompositon
-  [∀ ω (s : Set Ω), Decidable (ω ∈ s)] [TopologicalSpace ι] [OrderTopology ι]
+    [∀ ω (s : Set Ω), Decidable (ω ∈ s)] [TopologicalSpace ι] [OrderTopology ι]
     [SecondCountableTopology ι] [IsFiniteMeasure P] (hτ : IsStoppingTime 𝓕 τ) :
     ∃ A, MeasurableSet[hτ.measurableSpace] A ∧ A ⊆ {ω | τ ω < ⊤} ∧
       IsAccessibleTime 𝓕 (A.piecewise τ (fun _ ↦ ⊤)) ∧
