@@ -162,25 +162,23 @@ The class $\mathcal{R}_T$ of predictable rectangles
   =
   (s \vee s', t \wedge t'] \times (F \cap F').
   \]
-  Finally, the difference $A \setminus B$ is a disjoint union of at most three
-  predictable rectangles. If $s'\le s$, it is
+  Finally, let $I=(s,t]$ and $J=(s',t']$. Then
   \[
-    (s,t\wedge t']\times(F\setminus F')
-    \ \cup\ (s\vee t',t]\times F.
+    (I\times F)\setminus(J\times F')
+    =
+    ((I\setminus J)\times F)
+    \cup
+    ((I\cap J)\times(F\setminus F')).
   \]
-  If $s<s'$ and $t\le t'$, it is
+  The union is disjoint, and
   \[
-    (s,s'\wedge t]\times F
-    \ \cup\ (s\vee s',t]\times(F\setminus F').
+    I\setminus J
+    =
+    (s,t\wedge s']\cup(s\vee t',t].
   \]
-  In the remaining case, $s<s'\le t'<t$, and it is
-  \[
-    (s,s']\times F
-    \ \cup\ (s',t']\times(F\setminus F')
-    \ \cup\ (t',t]\times F.
-  \]
-  Empty intervals are omitted. The required measurability follows by
-  monotonicity of the filtration.
+  Hence $A\setminus B$ is a disjoint union of at most three predictable
+  rectangles. Indeed, $F\in\mathcal{F}_{s\vee t'}$ by monotonicity of the
+  filtration, and $F\setminus F'\in\mathcal{F}_{s\vee s'}$ as noted earlier.
 \end{proof}
 
 \begin{definition}[Elementary predictable set]\label{def:elementaryPredictableSet}
