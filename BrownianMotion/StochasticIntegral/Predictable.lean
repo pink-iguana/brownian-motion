@@ -248,12 +248,12 @@ def predictableRectangles [OrderBot ι] (𝓕 : Filtration ι m) :
 
 variable {Ω ι : Type*} {m : MeasurableSpace Ω} [LinearOrder ι] [OrderBot ι]
 
-private lemma singletonBot_prod_mem_predictableRectangles (𝓕 : Filtration ι m) {A : Set Ω}
+lemma singletonBot_prod_mem_predictableRectangles (𝓕 : Filtration ι m) {A : Set Ω}
     (hA : MeasurableSet[𝓕 ⊥] A) :
     {⊥} ×ˢ A ∈ 𝓕.predictableRectangles :=
   Or.inl ⟨A, hA, rfl⟩
 
-private lemma Ioc_prod_mem_predictableRectangles (𝓕 : Filtration ι m) (i j : ι) {A : Set Ω}
+lemma Ioc_prod_mem_predictableRectangles (𝓕 : Filtration ι m) (i j : ι) {A : Set Ω}
     (hA : MeasurableSet[𝓕 i] A) :
     Set.Ioc i j ×ˢ A ∈ 𝓕.predictableRectangles := by
   by_cases hij : i < j
