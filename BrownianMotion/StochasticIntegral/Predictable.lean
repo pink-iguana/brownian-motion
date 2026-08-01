@@ -248,12 +248,12 @@ def predictableRectangles [OrderBot ι] (𝓕 : Filtration ι m) :
 
 variable {Ω ι : Type*} {m : MeasurableSpace Ω} [LinearOrder ι] [OrderBot ι]
 
-lemma singletonBot_prod_mem_predictableRectangles (𝓕 : Filtration ι m) {A : Set Ω}
+private lemma singletonBot_prod_mem_predictableRectangles (𝓕 : Filtration ι m) {A : Set Ω}
     (hA : MeasurableSet[𝓕 ⊥] A) :
     {⊥} ×ˢ A ∈ 𝓕.predictableRectangles :=
   Or.inl ⟨A, hA, rfl⟩
 
-lemma Ioc_prod_mem_predictableRectangles (𝓕 : Filtration ι m) (i j : ι) {A : Set Ω}
+private lemma Ioc_prod_mem_predictableRectangles (𝓕 : Filtration ι m) (i j : ι) {A : Set Ω}
     (hA : MeasurableSet[𝓕 i] A) :
     Set.Ioc i j ×ˢ A ∈ 𝓕.predictableRectangles := by
   by_cases hij : i < j
@@ -310,77 +310,41 @@ lemma isSetSemiring_predictableRectangles (𝓕 : Filtration ι m) :
       · simpa using Ioc_prod_mem_predictableRectangles 𝓕 i j hA
       · simp only [Finset.coe_singleton, Set.sUnion_singleton]
         exact sdiff_eq_self_iff_disjoint.mpr disjoint_singletonBot_prod_Ioc_prod
-    · rcases le_or_gt i' i with hi'i | hii'
-      · let R₁ := Set.Ioc i (min j j') ×ˢ (A \ B)
-        let R₂ := Set.Ioc (max i j') j ×ˢ A
-        refine ⟨{R₁, R₂}, ?_, ?_, ?_⟩
-        · rw [Finset.coe_insert, Finset.coe_singleton, Set.insert_subset_iff,
-            Set.singleton_subset_iff]
-          refine ⟨Ioc_prod_mem_predictableRectangles 𝓕 _ _
-            (hA.diff (𝓕.mono hi'i _ hB)), ?_⟩
-          exact Ioc_prod_mem_predictableRectangles 𝓕 _ _
-            (𝓕.mono (le_max_left i j') _ hA)
-        · rw [Finset.coe_insert, Finset.coe_singleton, Set.pairwiseDisjoint_insert]
-          refine ⟨Set.pairwiseDisjoint_singleton _ _, ?_⟩
-          intro R hR hne
+    · let R₁ := Set.Ioc i (min j i') ×ˢ A
+      let R₂ := Set.Ioc (max i j') j ×ˢ A
+      let R₃ := Set.Ioc (max i i') (min j j') ×ˢ (A \ B)
+      refine ⟨{R₁, R₂, R₃}, ?_, ?_, ?_⟩
+      · rw [Finset.coe_insert, Finset.coe_insert, Finset.coe_singleton,
+          Set.insert_subset_iff, Set.insert_subset_iff, Set.singleton_subset_iff]
+        refine ⟨Ioc_prod_mem_predictableRectangles 𝓕 _ _ hA,
+          Ioc_prod_mem_predictableRectangles 𝓕 _ _ (𝓕.mono (le_max_left i j') _ hA), ?_⟩
+        exact Ioc_prod_mem_predictableRectangles 𝓕 _ _
+          ((𝓕.mono (le_max_left i i') _ hA).diff (𝓕.mono (le_max_right i i') _ hB))
+      · have h₁₂ : Disjoint R₁ R₂ :=
+          disjoint_Ioc_prod_Ioc_prod
+            ((min_le_right j i').trans (hi'j'.le.trans (le_max_right i j')))
+        have h₁₃ : Disjoint R₁ R₃ :=
+          disjoint_Ioc_prod_Ioc_prod
+            ((min_le_right j i').trans (le_max_right i i'))
+        have h₂₃ : Disjoint R₂ R₃ :=
+          (disjoint_Ioc_prod_Ioc_prod
+            ((min_le_right j j').trans (le_max_right i j'))).symm
+        rw [Finset.coe_insert, Finset.coe_insert, Finset.coe_singleton,
+          Set.pairwiseDisjoint_insert, Set.pairwiseDisjoint_insert]
+        refine ⟨⟨Set.pairwiseDisjoint_singleton _ _, ?_⟩, ?_⟩
+        · intro R hR _
           rw [Set.mem_singleton_iff] at hR
           subst R
-          exact disjoint_Ioc_prod_Ioc_prod
-            ((min_le_right j j').trans (le_max_right i j'))
-        · simp only [Finset.coe_insert, Finset.coe_singleton, Set.sUnion_insert,
-            Set.sUnion_singleton]
-          ext ⟨t, ω⟩
-          simp only [Set.mem_sdiff, Set.mem_prod, Set.mem_Ioc, Set.mem_union, R₁, R₂]
-          grind
-      · rcases le_or_gt j j' with hjj' | hj'j
-        · let R₁ := Set.Ioc i (min i' j) ×ˢ A
-          let R₂ := Set.Ioc (max i i') j ×ˢ (A \ B)
-          refine ⟨{R₁, R₂}, ?_, ?_, ?_⟩
-          · rw [Finset.coe_insert, Finset.coe_singleton, Set.insert_subset_iff,
-              Set.singleton_subset_iff]
-            refine ⟨Ioc_prod_mem_predictableRectangles 𝓕 _ _ hA, ?_⟩
-            exact Ioc_prod_mem_predictableRectangles 𝓕 _ _
-              ((𝓕.mono (le_max_left i i') _ hA).diff
-                (𝓕.mono (le_max_right i i') _ hB))
-          · rw [Finset.coe_insert, Finset.coe_singleton, Set.pairwiseDisjoint_insert]
-            refine ⟨Set.pairwiseDisjoint_singleton _ _, ?_⟩
-            intro R hR hne
-            rw [Set.mem_singleton_iff] at hR
-            subst R
-            exact disjoint_Ioc_prod_Ioc_prod
-              ((min_le_left i' j).trans (le_max_right i i'))
-          · simp only [Finset.coe_insert, Finset.coe_singleton, Set.sUnion_insert,
-              Set.sUnion_singleton]
-            ext ⟨t, ω⟩
-            simp only [Set.mem_sdiff, Set.mem_prod, Set.mem_Ioc, Set.mem_union, R₁, R₂]
-            grind
-        · let R₁ := Set.Ioc i i' ×ˢ A
-          let R₂ := Set.Ioc i' j' ×ˢ (A \ B)
-          let R₃ := Set.Ioc j' j ×ˢ A
-          refine ⟨{R₁, R₂, R₃}, ?_, ?_, ?_⟩
-          · rw [Finset.coe_insert, Finset.coe_insert, Finset.coe_singleton,
-              Set.insert_subset_iff, Set.insert_subset_iff, Set.singleton_subset_iff]
-            refine ⟨Ioc_prod_mem_predictableRectangles 𝓕 _ _ hA,
-              Ioc_prod_mem_predictableRectangles 𝓕 _ _
-                ((𝓕.mono hii'.le _ hA).diff hB), ?_⟩
-            exact Ioc_prod_mem_predictableRectangles 𝓕 _ _
-              (𝓕.mono (hii'.le.trans hi'j'.le) _ hA)
-          · rw [Finset.coe_insert, Finset.coe_insert, Finset.coe_singleton,
-              Set.pairwiseDisjoint_insert, Set.pairwiseDisjoint_insert]
-            refine ⟨⟨Set.pairwiseDisjoint_singleton _ _, ?_⟩, ?_⟩
-            · intro R hR hne
-              rw [Set.mem_singleton_iff] at hR
-              subst R
-              exact disjoint_Ioc_prod_Ioc_prod le_rfl
-            · intro R hR hne
-              rw [Set.mem_insert_iff, Set.mem_singleton_iff] at hR
-              rcases hR with rfl | rfl
-              · exact disjoint_Ioc_prod_Ioc_prod le_rfl
-              · exact disjoint_Ioc_prod_Ioc_prod hi'j'.le
-          · simp only [Finset.coe_insert, Finset.coe_singleton, Set.sUnion_insert,
-              Set.sUnion_singleton]
-            ext ⟨t, ω⟩
-            simp only [Set.mem_sdiff, Set.mem_prod, Set.mem_Ioc, Set.mem_union, R₁, R₂, R₃]
-            grind
+          exact h₂₃
+        · intro R hR _
+          rw [Set.mem_insert_iff, Set.mem_singleton_iff] at hR
+          rcases hR with rfl | rfl
+          · exact h₁₂
+          · exact h₁₃
+      · simp only [Finset.coe_insert, Finset.coe_singleton, Set.sUnion_insert,
+          Set.sUnion_singleton]
+        ext ⟨t, ω⟩
+        simp only [Set.mem_sdiff, Set.mem_prod, Set.mem_Ioc, Set.mem_union, R₁, R₂, R₃]
+        grind
 
 end MeasureTheory.Filtration
