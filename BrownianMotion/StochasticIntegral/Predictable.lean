@@ -275,6 +275,7 @@ private lemma disjoint_singletonBot_prod_Ioc_prod {i j : ι} {A B : Set Ω} :
   left
   exact Set.disjoint_left.mpr fun _ hx hx' ↦ (not_lt_of_ge bot_le) (hx ▸ hx'.1)
 
+/-- The predictable rectangles associated with a filtration form a semiring of sets. -/
 lemma isSetSemiring_predictableRectangles (𝓕 : Filtration ι m) :
     IsSetSemiring 𝓕.predictableRectangles where
   empty_mem := by
